@@ -55,35 +55,35 @@ class RallyModel():
     
     #Creating the tables
     project_tests_list = Table('project_tests_list', metadata,
-        Column('id', Integer(), primary_key=True, unique=True, nullable=False),
-        Column('name', String(100), default='', unique=True, nullable=False),
-        Column('test_status', Integer(), default='0', nullable=True),
-        Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
-        Column('extra', Text)
-    )
+                               Column('id', Integer(), primary_key=True, unique=True, nullable=False),
+                               Column('name', String(100), default='', unique=True, nullable=False),
+                               Column('test_status', Integer(), default='0', nullable=True),
+                               Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
+                               Column('extra', Text)
+                               )
 
     #Creating a configuration table
     tests_list   = Table('tests_list', metadata,
-         Column('id', String(100), primary_key=True, unique=True, nullable=False),
-         Column('name', String(200), default='', nullable=False),
-         Column('project_id', Integer, ForeignKey('project_tests_list.id')),
-         Column('test_service', String(200), default='', nullable=False),
-         Column('test_scenario', String(100), default='', nullable=False),
-         Column('test_regex', String(300), default='', nullable=False),
-         Column('test_added', Integer(), default='0', nullable=True),
-         Column('test_verified', String(100), nullable=True),
-         Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
-         Column('test_uuid', String(200), nullable=True),
-          Column('results', Text(), default='', nullable=False)
-    )
+                         Column('id', String(100), primary_key=True, unique=True, nullable=False),
+                         Column('name', String(200), default='', nullable=False),
+                         Column('project_id', Integer, ForeignKey('project_tests_list.id')),
+                         Column('test_service', String(200), default='', nullable=False),
+                         Column('test_scenario', String(100), default='', nullable=False),
+                         Column('test_regex', String(300), default='', nullable=False),
+                         Column('test_added', Integer(), default='0', nullable=True),
+                         Column('test_verified', String(100), nullable=True),
+                         Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
+                         Column('test_uuid', String(200), nullable=True),
+                         Column('results', Text(), default='', nullable=False)
+                         )
 
     #Test logs
     test_log = Table('tests_log', metadata,
-         Column('id', String(100), primary_key=True, unique=True, nullable=False),
-         Column('log_data', Text(), default='', nullable=False),
-         Column('project_id', String(100), default='', nullable=False),
-	 Column('test_status', Integer(), default='0', nullable=True)
-    )
+                     Column('id', String(100), primary_key=True, unique=True, nullable=False),
+                     Column('log_data', Text(), default='', nullable=False),
+                     Column('project_id', String(100), default='', nullable=False),
+                     Column('test_status', Integer(), default='0', nullable=True)
+                     )
 
     #Creating the tables
     metadata.create_all(engine)
@@ -182,20 +182,35 @@ class RallyModel():
             test_list.append(test_data)
         return test_list
 
-    def update_test(self, test_id, data):
+    def update_test(self, test_id, args):
         """
         # | Method to update an tests
         # |
         # | Arguments:
         # |     <uuid>: id
-        # |     <data>: Dictionary containg diffrent update sections
+        # |     <args>: Dictionary containg diffrent update sections
         # |
         # | Returns: None
         """
+        LOG.info('++++++++Update_test section in Model+++++++++')
+        data = {}
         
-        #Getting the details of event using event id
+        #Fetching all individual values and storing it before DB updation
+        if "test_verified" in args['test_list']:
+	    data['test_verified'] = args['test_list']['test_verified']
+	if "test_added" in args['test_list']:
+	    data['test_added'] = args['test_list']['test_added']
+        if "test_uuid" in args['test_list']:
+            data['test_uuid']  = args['test_list']['test_uuid']
+        if "results" in args['test_list']:
+            data['results']  = args['test_list']['results']
+        
+        LOG.info('+++++++Entering the sidecar update_test function++++++++')
         #Updating the data
         update = self.tests_list.update().where(self.tests_list.c.id == test_id).values(data)
+        LOG.info('Update Query is ')
+        LOG.info(update)
+        LOG.info('+++++++++++++++++++++++++++')
         self.conn.execute(update)
         LOG.info("Test is updated succesfully.")
 
@@ -246,10 +261,11 @@ class RallyModel():
             log_data['test_service']           = row['test_service']
             log_data['test_scenario']          = row['test_scenario']
             log_data['test_regex']             = row['test_regex']
-            log_data['test_added']       = row['test_added']
-	    log_data['test_verified']    = row['test_verified']
+            log_data['test_added']             = row['test_added']
+	    log_data['test_verified']          = row['test_verified']
 	    log_data['test_create_time']       = row['test_create_time']
-	    log_data['test_uuid'] = row['test_uuid']
+	    log_data['test_uuid']              = row['test_uuid']
+            log_data['results']                = row['results']
             log_list.append(log_data)
         
 	#Retunrning the log list
@@ -282,7 +298,7 @@ class RallyModel():
         #Getting the values are setting it in list
         test_list = []
         for row in result:
-            reports = self.conn.execute("select * from verification_results where verification_uuid='"+str(row['test_uuid'])+"'")
+            reports = self.conn.execute("select * from verification_results where verification_uuid='" + str(row['test_uuid']) + "'")
 	    for report in reports:
 		report_data = collections.OrderedDict()
 		report_data['updated_at'] = report['updated_at']
