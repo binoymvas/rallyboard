@@ -57,7 +57,8 @@ def get_test_detail(request, **kwargs):
     test_list = sidecar.events.tests_list(project_id=kwargs['test_id'], test_added=1)
     report_list = []
     for tests in test_list._logs:
-        report_list.append(tests)
+	tests['report_url'] = tests['id']+'/report'
+	report_list.append(tests)
 
     context = {
         "page_title": _("Test Details"),
