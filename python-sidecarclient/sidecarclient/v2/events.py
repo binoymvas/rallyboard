@@ -361,25 +361,40 @@ class TestResults(object):
     # | Type: String 
     test_regex = None
 
-
     # | test_create_time:  Log create time in yyy-mm-dd HH:ii:ss format
     # |
     # | Default Value: None
     # |
     # | Type: date 
     test_create_time = None
+    
+    # | test_create_time:  Log create time in yyy-mm-dd HH:ii:ss format
+    # |
+    # | Default Value: None
+    # |
+    # | Type: date 
+    test_uuid = None
+
+    # | test_create_time:  Log create time in yyy-mm-dd HH:ii:ss format
+    # |
+    # | Default Value: None
+    # |
+    # | Type: date 
+    results = None
 
     def __init__(self, logs):
         """ Initialization Function """
-        self.id              = logs['id']
-        self.name            = logs['name']
-        self.project_id = logs['project_id']
-        self.test_service    = logs['test_service']
-        self.test_scenario   = logs['test_scenario']
-        self.test_regex      = logs['test_regex']
-        self.test_added      = logs['test_added']
-        self.test_verified   = logs['test_verified']
+        self.id               = logs['id']
+        self.name             = logs['name']
+        self.project_id       = logs['project_id']
+        self.test_service     = logs['test_service']
+        self.test_scenario    = logs['test_scenario']
+        self.test_regex       = logs['test_regex']
+        self.test_added       = logs['test_added']
+        self.test_verified    = logs['test_verified']
         self.test_create_time = logs['test_create_time']
+        self.test_uuid        = logs['test_uuid']
+        self.results          = logs['results']
 
 class TestResultsGenerator(object):
     """ Project Generator object """
@@ -834,34 +849,43 @@ class EventsHttp(object):
         data = self._obj.http.get(url, headers)
         return TestResultsGenerator(data['body'])
 
-    def update_test(self, id=None, name=None, test_added=None, test_verified=None):
+    def update_test(self, id=None, name=None, test_added=None, test_verified=None, test_uuid=None, results=None):
         """
         # | Function to edit the event
         # |
         # | Arguments:
-        # |     :id          <string>: event id
-        # |     :name        <string>: name of the event
-        # |     :node_uuid   <string>: Host id
-        # |     :event_create_time <string in yyyy-mm-dd HH:ii::ss format>: Event create time
-        # |     :event_status <string, either running, completed>
-        # |
+        # |     :id            <string>: test id
+        # |     :name          <string>: name of the test
+        # |     :test_uuid     <string>: UUID obtained after executing the test
+        # |     :test_added    <string>: whether the test is enabled or not
+        # |     :test_verified <string>: whether the test has been executed or not
+        # |     :results       <string>: the output obtained after test execution
         # | Returns:
         # |   None
         """
-        event_id = id
+        test_id = id
         self._obj.authenticate()
         headers = {"X-Auth-Token":self._obj.authenticated_token}
         url = self._obj.sidecar_url + '/evacuates/sidecarrally/testlist/%s' %(id)
         data = {}
         data["test_list"] = {}
+        LOG.info('++++++++++++Fetching Values+++++++++++++')
 
-        # | Creating event list
+        # | Creating test list
         if name:
             data["test_list"]["name"] =  name
         if test_added:
             data["test_list"]["test_added"] = test_added
         if test_verified:
             data["test_list"]["test_verified"] = test_verified
+        if test_uuid:
+            data["test_list"]["test_uuid"] = test_uuid
+        if results:
+            data["test_list"]["results"]   = results
+        
+        LOG.info('+++++++++++++++++++')
+        LOG.info(url)
+        LOG.info('+++++++++++++++++++')
         data = self._obj.http.put(url, data, headers)
 
     def test_report(self, id=None, project_id=None):
