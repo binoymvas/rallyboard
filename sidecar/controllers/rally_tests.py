@@ -155,7 +155,7 @@ class TestListController(RestController):
 
 
     @expose(generic=True, template='json', content_type="application/json")
-    def put(self, test_id):
+    def put(self, test_id, **kw):
         """
         # | Function to handel the edit part of an event
         # |
@@ -165,12 +165,16 @@ class TestListController(RestController):
         # | Returns: Dictionary
         """
         try:
+            LOG.info('PUT SECTION')
             rbac.enforce('edit_event', pecan.request)
             #valid = validation.Validation()
             #valid.json_header()
             #json_data = valid.json_data('edit_event', pecan.request.body_file.read())
-            kw = {}
-            kw['test_added'] = '1'
+            #kw = {}
+            #kw['test_added'] = '1'
+            LOG.info('++++++++++++++++++++++++++++++')
+            LOG.info(kw)
+            LOG.info('++++++++++++++++++++++++++++++')
             self.rally_tests.update_test(test_id, kw)
             pecan.response.status = 204
         except Exception as e:
@@ -300,11 +304,12 @@ class RallyTestController(RestController):
         """
         #execute All tests
         for row in test_list:
-            test_id  = row['id']
-            regex    = row['test_regex']
+            test_id    = row['id']
+            regex      = row['test_regex']
 	    project_id = row['project_id']
             LOG.info('Entering the loop for All Tests section')
-            #output = subprocess.call('rally verify start --system-wide --regex ' + regex, shell=True)
+            
+            #Setting the command which is to be executed
             cmd = 'rally verify start --system-wide --regex ' + regex 
 	    LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
@@ -315,9 +320,16 @@ class RallyTestController(RestController):
 	    LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
             LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
             uuid = self.extractVerificationUUID(output)
-            LOG.info('Updating the test uuid in the Database')
+            LOG.info('Test UUID is ')
+	    LOG.info(uuid)
+            
+            LOG.info('Executing the function for generating the report')
+            test_report = generateTestReport(self, test_id, uuid)
+
+            LOG.info('Updating the test details in the Database')
   	    kw = {}
   	    kw['test_uuid'] = uuid
+            kw['results']   = test_report
             exec_test = self.rally_tests.update_test(test_id, kw)
 	return True
 
@@ -367,11 +379,12 @@ class RallyTestController(RestController):
 
     def extractVerificationUUID(self, output):
         """
-        # |
-        # |
-        # |
-        # |
-        # |
+        # | Function to extract the Verification UUID from the output after running the Tempests Tests
+        # | 
+        # | <Arguments>
+        # |     output: the output obtained after running the test
+        # | <Return>
+        # |     match[0] : the UUID obtained after regex check
         """
         #extract the Verification UUID from the output
         replaced_output = output.replace('\n', ' ')
@@ -379,15 +392,16 @@ class RallyTestController(RestController):
         LOG.info(replaced_output)
         match = re.findall('Verification UUID: (.*?) ', replaced_output)
         LOG.info(match)
-        return match
+        return match[0]
 
     def extractTestUUID(self, output):
         """
-        # | Extract the UUID of the test
+        # | Extract the UUID from the output obtained after running the benchmark tests
         # |
-        # |
-        # |
-        # |
+        # | <Arguments>
+        # |     output: the output obtained after running the test
+        # | <Return>
+        # |     match[0]: the UUID obtained after the regex check   
         """
         #extract the test UUID from the output
         replaced_output = output.replace('\n', ' ')
@@ -395,7 +409,24 @@ class RallyTestController(RestController):
         LOG.info(replaced_output)
         match = re.findall('rally task results (.*?) ', replaced_output)
         LOG.info(match)
-        return match
+        return match[0]
+
+    def generateTestReport(self, test_id, test_uuid):
+        """
+        # | Generate the Test Report using test uuid
+        # | <Arguments>:
+        # |    test_id: The id of the test which is to be executed
+        # |    test_uuid: UUID obtained after running the test
+        # | <Return>:
+        # |    test_report: a test report in html format
+        # |
+        """
+        LOG.info('Going to generate the test report')
+        report_cmd = 'rally verify results --uuid '+ test_uuid +' --html'
+        LOG.info('Report command is '+ report_cmd)
+        p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
+        output, err = p.communicate()
+        return output
 
 def exception_handle(e):
     """
