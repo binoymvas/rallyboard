@@ -1,0 +1,58 @@
+{% load i18n %}
+{% csrf_token %}
+iiiiiii
+<script type="text/javascript">
+    window.csrf_val = $("input[name='csrfmiddlewaretoken']").val();
+</script>
+<script>
+//Loading js after document ready
+$( document ).ready(function() {
+    $(document).on("click", "#run_tests", function() {
+        $.ajax({
+            beforeSend: function(xhr)  {
+                xhr.setRequestHeader('X-CSRFToken', window.csrf_val);  
+            },
+            type: 'POST',  
+            url: "/dashboard/rally_dashboard/1/runtests",
+            data: { 'test_id' : '1'},
+            success: function (xhr, ajaxOptions, thrownError) {
+  	        $("#log_data").html(xhr);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                alert("failed");
+            }                
+        });
+    });
+});
+</script>
+<div class="status detail">
+    <dl class="dl-horizontal">
+	<table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
+   	    <thead>
+        	<tr class="table_caption">
+		    <th class="table_header" colspan="9" data-column="0">
+			<div class="table_actions clearfix"><input type="submit" name="run_tests" id="run_tests" value="Run Tests"</div>
+	 	    </th>
+		</tr>
+		<tr class="tablesorter-headerRow">
+	            <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Test Id</div></th>
+  	  	    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Name</div></th>
+	            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
+          	    <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>
+ 		</tr>
+	    </thead>
+	    <tbody>
+		{% for test in test_lists %}
+		    <tr class="{% cycle 'odd' 'even' %}" id="test_listing{{test.id}}" class="test_listing">
+			<td class="sortable normal_column">{{test.id}}</td>
+			<td class="sortable normal_column">{{test.name}}</td>
+			<td class="sortable normal_column">{{test.test_regex}}</td>
+			<td class="sortable normal_column">{{test.test_uuid}}</td>
+		    </tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+    </dl>
+</div>
+<div id="log_data">
+</div>
