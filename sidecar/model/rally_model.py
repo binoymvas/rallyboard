@@ -179,6 +179,8 @@ class RallyModel():
             test_data['test_added']       = row['test_added']
             test_data['test_verified']    = row['test_verified']
             test_data['test_create_time'] = row['test_create_time']
+	    test_data['test_uuid']        = row['test_uuid']
+	    test_data['results']          = row['results']
             test_list.append(test_data)
         return test_list
 
@@ -192,9 +194,8 @@ class RallyModel():
         # |
         # | Returns: None
         """
-        LOG.info('++++++++Update_test section in Model+++++++++')
-        data = {}
         
+	data = {}
         #Fetching all individual values and storing it before DB updation
         if "test_verified" in args['test_list']:
 	    data['test_verified'] = args['test_list']['test_verified']
@@ -205,12 +206,8 @@ class RallyModel():
         if "results" in args['test_list']:
             data['results']  = args['test_list']['results']
         
-        LOG.info('+++++++Entering the sidecar update_test function++++++++')
         #Updating the data
         update = self.tests_list.update().where(self.tests_list.c.id == test_id).values(data)
-        LOG.info('Update Query is ')
-        LOG.info(update)
-        LOG.info('+++++++++++++++++++++++++++')
         self.conn.execute(update)
         LOG.info("Test is updated succesfully.")
 
@@ -242,10 +239,6 @@ class RallyModel():
         """
         #Getting the detail of the test
         get_data_select = select([self.tests_list]).where(and_(self.tests_list.c.test_added == 1, self.tests_list.c.project_id == test_id))
-	LOG.info('get_data_select')
-	LOG.info(get_data_select)
-	LOG.info('get_data_select')
-
         try:
             result = self.conn.execute(get_data_select)
         except Exception as e:
@@ -318,21 +311,20 @@ class RallyModel():
         # |
         # | Returns 
         """
+
 	# Okay Bow lets start our query builder
         get_test_log = select([self.test_log])
         LOG.info("Created the query to get the log of project.")
-	LOG.info(project_id)
         #Making the search criteria
         if project_id != None:
             get_test_log = get_test_log.where(self.test_log.c.project_id == project_id)
-	    LOG.info(get_test_log)
         try:
             result = self.conn.execute(get_test_log)
         except Exception as e:
             LOG.error(str(e))
             return []
 
-
+	#Fetching the details from the result
 	row = result.fetchone()
         log_data = collections.OrderedDict()
 	log_data['id'] = row['id']
@@ -340,40 +332,3 @@ class RallyModel():
         log_data['project_id'] = row ['project_id']
         log_data['test_status'] = row ['test_status']
         return log_data
-
-	"""
-        result["id"]                  = uuid
-        result["name"]                = data["name"]
-        result["event_status"]        = data["event_status"]
-        result["event_create_time"]   = data["event_create_time"]
-        result["event_complete_time"] = data["event_complete_time"]
-        result["node_uuid"]           = data["node_uuid"]
-        result["vm_uuid_list"]        = None
-        result['extra']               = None
-        result['moredata']            = None
-        result['predata']             = None
-    
-        # If the proper data is there 
-        # then convert them into json
-        if data["vm_uuid_list"]:
-            result["vm_uuid_list"] = json.loads(data["vm_uuid_list"])
-        if data['extra']:
-            result['extra'] = json.loads(data['extra'])
- 
-        return result
-
-
-        #Getting the values are setting it in list
-        test_logs = []
-        for row in result:
-	    log_data = collections.OrderedDict()
-	    log_data['id'] = row['id']
-   	    log_data['log_data'] = row['log_data']
-	    log_data['project_id'] = row ['project_id']
-	    log_data['test_status'] = row ['test_status']
-  	    test_logs.append(log_data)
-	LOG.info('test_logs')
-        LOG.info(test_logs)
-	LOG.info('test_logs')
-	return test_logs
-	"""

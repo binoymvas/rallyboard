@@ -869,7 +869,6 @@ class EventsHttp(object):
         url = self._obj.sidecar_url + '/evacuates/sidecarrally/testlist/%s' %(id)
         data = {}
         data["test_list"] = {}
-        LOG.info('++++++++++++Fetching Values+++++++++++++')
 
         # | Creating test list
         if name:
@@ -882,10 +881,6 @@ class EventsHttp(object):
             data["test_list"]["test_uuid"] = test_uuid
         if results:
             data["test_list"]["results"]   = results
-        
-        LOG.info('+++++++++++++++++++')
-        LOG.info(url)
-        LOG.info('+++++++++++++++++++')
         data = self._obj.http.put(url, data, headers)
 
     def test_report(self, id=None, project_id=None):

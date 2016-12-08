@@ -237,6 +237,7 @@ class RallyTestController(RestController):
 	
 		#Callign the execution methods
         	if str(project_id) == '1':
+ 		    self.update_testlog(project_id, '', 0)
 		    test_output = self.executeAllTests(result)
 		    LOG.info('nooooooooooooooooooooooo---------------------')
 		    print(test_output)
@@ -321,15 +322,14 @@ class RallyTestController(RestController):
             LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
             uuid = self.extractVerificationUUID(output)
             LOG.info('Test UUID is ')
-	    LOG.info(uuid)
-            
+	    LOG.info(uuid)            
             LOG.info('Executing the function for generating the report')
-            test_report = generateTestReport(self, test_id, uuid)
-
+            test_report = self.generateTestReport(test_id, uuid)
             LOG.info('Updating the test details in the Database')
-  	    kw = {}
-  	    kw['test_uuid'] = uuid
-            kw['results']   = test_report
+	    kw = {}
+  	    kw['test_list'] = {}
+  	    kw['test_list']['test_uuid'] = uuid
+            kw['test_list']['results']   = test_report
             exec_test = self.rally_tests.update_test(test_id, kw)
 	return True
 

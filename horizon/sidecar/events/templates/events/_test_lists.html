@@ -18,7 +18,7 @@ $( document ).ready(function() {
   	        $("#log_data").html(xhr);
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                alert("failed");
+                //alert("failed");
             }                
         });
 
@@ -45,14 +45,12 @@ $( document ).ready(function() {
     <dl class="dl-horizontal">
 	<table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
    	    <thead>
-		<iframe src="http://198.100.181.68/dashboard/rally_dashboard/get_log?project_id=1" height="500px;" width="1100px;"></iframe>
         	<tr class="table_caption">
 		    <th class="table_header" colspan="9" data-column="0">
 			<div class="table_actions clearfix"><input type="submit" name="run_tests" id="run_tests" value="Run Tests"</div>
 	 	    </th>
 		</tr>
 		<tr class="tablesorter-headerRow">
-	            <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Test Id</div></th>
   	  	    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Name</div></th>
 	            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
           	    <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>
@@ -61,7 +59,6 @@ $( document ).ready(function() {
 	    <tbody>
 		{% for test in test_lists %}
 		    <tr class="{% cycle 'odd' 'even' %}" id="test_listing{{test.id}}" class="test_listing">
-			<td class="sortable normal_column">{{test.id}}</td>
 			<td class="sortable normal_column">{{test.name}}</td>
 			<td class="sortable normal_column">{{test.test_regex}}</td>
 			<td class="sortable normal_column">{{test.test_uuid}}</td>
@@ -70,6 +67,5 @@ $( document ).ready(function() {
 	    </tbody>
 	</table>
     </dl>
-<a>{% verbatim %}dddd{% endverbatim %}</a>
     <div id="log_data"></div>
 </div>
