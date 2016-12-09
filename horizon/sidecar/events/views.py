@@ -57,8 +57,8 @@ def get_test_detail(request, **kwargs):
     test_list = sidecar.events.tests_list(project_id=kwargs['test_id'], test_added=1)
     report_list = []
     for tests in test_list._logs:
-	tests['report_url'] = tests['id']+'/report'
-	report_list.append(tests)
+        tests['report_url'] = tests['id']+'/report'
+        report_list.append(tests)
 
     context = {
         "page_title": _("Test Details"),
@@ -141,6 +141,24 @@ def get_test_report(request, **kwargs):
         "tests": report_list
     }
     return render(request, 'rally_dashboard/events/test_detail.html', context)
+
+def display_report(request, **kwargs):
+
+    test_report = sidecar.events.test_report(id = kwargs['test_id'])
+    test_result = ''
+    for row in test_report._logs:
+        test_result  =  row['results']
+
+    print('+++++++++++++++++++++++') 
+    print test_result
+ 
+    #Displaying the report
+    context = {
+        "page_title": _("Test Report"),
+        "test_report": test_result
+    }
+   
+    return render(request, 'rally_dashboard/events/view_report.html', context)
 
 
 def execute_testiii(request):

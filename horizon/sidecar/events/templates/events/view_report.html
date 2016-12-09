@@ -1,0 +1,9 @@
+{% extends 'rally_dashboard/events/sidecarbase.html' %}
+{% load i18n %}
+{% block title %}{% trans "Rally Test Report" %}{% endblock %}
+
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=page_title %}
+  {{test_report | safe}}
+{% endblock page_header %}
+
