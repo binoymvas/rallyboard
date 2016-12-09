@@ -63,7 +63,10 @@ $( document ).ready(function() {
 			<td class="sortable normal_column">{{test.name}}</td>
 			<td class="sortable normal_column">{{test.test_regex}}</td>
 			<td class="sortable normal_column">{{test.test_uuid}}</td>
- 		        <td class="sortable normal_column"><a href="../{{test.report_url}}">Test Report</a></td>
+ 		        <td class="sortable normal_column">
+			{% if test.report_url %}
+                            <a href="../{{test.report_url}}">Test Report</a>
+                        {% endif %}
 		    </tr>
 		{% endfor %}
 	    </tbody>
