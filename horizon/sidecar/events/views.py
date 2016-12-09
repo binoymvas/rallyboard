@@ -53,13 +53,26 @@ class IndexView(tabs.TabbedTableView):
     page_title      = "Rally Tests"
 
 def get_test_detail(request, **kwargs):
+    """
+    # | Function to get the test details
+    # |
+    # | Arguments: Kwargs: test id
+    # |
+    # | Returns: Template 
+    """
 
+    #Getting the test detaisl
     test_list = sidecar.events.tests_list(project_id=kwargs['test_id'], test_added=1)
     report_list = []
+	
+    #Creating the test details dictionary	
     for tests in test_list._logs:
-        tests['report_url'] = tests['id']+'/report'
+	tests['report_url'] = ''
+        if tests['results'].strip() != '':
+            tests['report_url'] = tests['id']+'/report'
         report_list.append(tests)
-
+	
+    #Making the context for the template	
     context = {
         "page_title": _("Test Details"),
         "test_lists": report_list, #tests_listi
