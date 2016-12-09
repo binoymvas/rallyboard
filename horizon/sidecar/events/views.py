@@ -90,7 +90,7 @@ def get_test_details(request, **kwargs):
     """
 	
     #Values are taken from settings.py file
-    test_list = sidecar.events.run_command(id=1)
+    test_list = sidecar.events.run_command(id=kwargs['test_id'])
     """"
     #Creating the command for the logs
     command = 'sudo cat /tmp/rally_dashboard.log'
