@@ -23,6 +23,7 @@ from sqlalchemy.sql     import select
 from sqlalchemy         import Table, Column, Integer, String, MetaData, ForeignKey, DATETIME, Enum
 from sidecar            import exception
 from sqlalchemy.orm     import sessionmaker
+from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.dialects.postgresql import UUID
 try:
     import simplejson as json
@@ -74,7 +75,7 @@ class RallyModel():
                          Column('test_verified', String(100), nullable=True),
                          Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
                          Column('test_uuid', String(200), nullable=True),
-                         Column('results', Text(), default='', nullable=False)
+                         Column('results', LONGTEXT(), default='', nullable=False)
                          )
 
     #Test logs
@@ -311,13 +312,16 @@ class RallyModel():
         # |
         # | Returns 
         """
-
+        LOG.info('get_test_log function+++++++')
+        LOG.info(project_id)
 	# Okay Bow lets start our query builder
         get_test_log = select([self.test_log])
+        LOG.info(get_test_log)
         LOG.info("Created the query to get the log of project.")
         #Making the search criteria
         if project_id != None:
             get_test_log = get_test_log.where(self.test_log.c.project_id == project_id)
+	    LOG.info(get_test_log)
         try:
             result = self.conn.execute(get_test_log)
         except Exception as e:
