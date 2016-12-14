@@ -455,31 +455,43 @@ class RallyTestController(RestController):
         # |
         # | @Return:    
         """
-        #execute Benchmark tests
-        yaml_path       = '/home/qaTest/'
-        task_file       = 'task.yaml'
-        scenario        = yaml_path + task_file
-        LOG.info(scenario)
-        LOG.info('Going to execute the command - rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\'')
-        cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\''
- 	res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
-        output, err = res.communicate()
-        LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
-        #LOG.info(output)
-        LOG.info('Inserting the details into test log table')
-        self.update_testlog(project_id, output, 0)
-        LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
-        LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
-        uuid = self.extractTestUUID(output)
-        LOG.info(uuid)
-        LOG.info('Updating the test uuid in the Database')
-        kw = {}
-        kw['test_list'] = {}
-        kw['test_list']['test_uuid'] = uuid
-        kw['test_list']['results']   = test_report
-        #kw['test_uuid'] = uuid
-        exec_test = self.rally_tests.update_test(test_id, kw)
-	return True
+        for row in service_list:
+            test_id       = row['id']
+            service_name  = row['test_regex']
+            project_id    = row['project_id']
+
+            #execute Benchmark tests
+            #LOG.info(service_list)
+            LOG.info('service list printed above+++++++++++++++++++++++++')
+            LOG.info(project_id)
+            LOG.info('=========================================')
+            yaml_path       = '/home/benchmarkTests/'
+            task_file       = 'task.yaml'
+            scenario        = yaml_path + task_file
+            LOG.info(scenario)
+            LOG.info('Going to execute the command - rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\'')
+            cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\''
+            res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
+            output, err = res.communicate()
+            LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
+            #LOG.info(output)
+            LOG.info('Inserting the details into test log table')
+            self.update_testlog(project_id, output, 0)
+            LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
+            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
+            uuid = self.extractTestUUID(output)
+            LOG.info('Test UUID is ')
+            LOG.info(uuid)
+            LOG.info('Executing the function for generating the report')
+            test_report = self.generateBenchmarkTestReport(test_id, uuid)
+            LOG.info('Updating the test details in the Database')
+            kw = {}
+            kw['test_list'] = {}
+            kw['test_list']['test_uuid'] = uuid
+            kw['test_list']['results']   = test_report
+            exec_test = self.rally_tests.update_test(test_id, kw)
+            LOG.info('Completed')
+        return True
 
     def extractVerificationUUID(self, output):
         """
