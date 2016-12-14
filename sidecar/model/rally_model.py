@@ -76,7 +76,7 @@ class RallyModel():
                          Column('test_verified', String(100), nullable=True),
                          Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
                          Column('test_uuid', String(200), nullable=True),
-                         Column('results', Text(), default='', nullable=False)
+                         Column('results', LONGTEXT(), default='', nullable=False)
                          )
 
     #Test logs
