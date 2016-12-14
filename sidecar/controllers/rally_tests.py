@@ -532,16 +532,16 @@ class RallyTestController(RestController):
         output, err = p.communicate()
         return output
 
-     def generateBenchmarkTestReport(self, test_id, test_uuid):
-         """
-         # | Generate the Test Report of Benchmark Tests using test uuid
-         # | <Arguments>:
-         # |    test_id: The id of the test which is to be executed
-         # |    test_uuid: UUID obtained after running the test
-         # | <Return>:
-         # |    test_report: a test report in html format
-         # |
-         """
+    def generateBenchmarkTestReport(self, test_id, test_uuid):
+        """
+        # | Generate the Test Report of Benchmark Tests using test uuid
+        # | <Arguments>:
+        # |    test_id: The id of the test which is to be executed
+        # |    test_uuid: UUID obtained after running the test
+        # | <Return>:
+        # |    test_report: a test report in html format
+        # |
+        """
         LOG.info('Going to generate the test report')
  	LOG.info('@@@@@@@@@@@@@@@@@@@@@@')
  	LOG.info('Task UUID is ')
