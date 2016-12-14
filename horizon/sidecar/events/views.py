@@ -30,6 +30,8 @@ from openstack_dashboard.dashboards.sidecar.events import workflows as project_w
 from openstack_dashboard.dashboards.sidecar.events import setting
 import subprocess
 import os
+from openstack_dashboard import api
+
 
 """##################Setting the sidecar client##########################"""
 sidecar = client.Client(
@@ -41,6 +43,7 @@ sidecar = client.Client(
         timeout = getattr(settings, "SC_TIMEOUT"),
         insecure = getattr(settings, "SC_INSECURE")
     )
+default_value = setting.ConfigSetter()
 """#############################################"""
 class IndexView(tabs.TabbedTableView):
     """
@@ -53,26 +56,15 @@ class IndexView(tabs.TabbedTableView):
     page_title      = "Rally Tests"
 
 def get_test_detail(request, **kwargs):
-    """
-    # | Function to get the test details
-    # |
-    # | Arguments: Kwargs: test id
-    # |
-    # | Returns: Template 
-    """
 
-    #Getting the test detaisl
     test_list = sidecar.events.tests_list(project_id=kwargs['test_id'], test_added=1)
     report_list = []
-	
-    #Creating the test details dictionary	
     for tests in test_list._logs:
 	tests['report_url'] = ''
         if tests['results'].strip() != '':
             tests['report_url'] = tests['id']+'/report'
         report_list.append(tests)
-	
-    #Making the context for the template	
+
     context = {
         "page_title": _("Test Details"),
         "test_lists": report_list, #tests_listi
@@ -90,6 +82,9 @@ def get_test_details(request, **kwargs):
     """
 	
     #Values are taken from settings.py file
+    print("______________________________________________________________________")
+    print(kwargs)
+    print("______________________________________________________________________")
     test_list = sidecar.events.run_command(id=kwargs['test_id'])
     """"
     #Creating the command for the logs
@@ -127,7 +122,7 @@ def get_log(request, **kwargs):
 	log_data = outputStr.log_data
 	outputStr = " <br>".join(log_data.split("\n"))
     except Exception, e:
-        outputStr = "Error while fetching the details from logs"	
+        outputStr = "Updating the logs..."	
     #Making the output
     context = {
         "page_title": _("Test Details"),
@@ -135,8 +130,6 @@ def get_log(request, **kwargs):
         "log_data": outputStr
     }
     return render(request, 'rally_dashboard/events/test_logs.html', context)
-    #return render(request, 'rally_dashboard/events/a.html', context)
-    #return render(request, 'rally_dashboard/events/b.html', context)
 
 def get_test_report(request, **kwargs):
 
@@ -162,29 +155,20 @@ def display_report(request, **kwargs):
     for row in test_report._logs:
         test_result  =  row['results']
 
-    print('+++++++++++++++++++++++') 
-    print test_result
- 
     #Displaying the report
     context = {
         "page_title": _("Test Report"),
         "test_report": test_result
     }
-   
     return render(request, 'rally_dashboard/events/view_report.html', context)
 
-
-def execute_testiii(request):
-    print("hai")
-
-
-
 class UpdateProjectView(workflows.WorkflowView):
-    workflow_class = project_workflows.UpdateProject
+    #workflow_class = project_workflows.UpdateProject
+    workflow_class = project_workflows.UpdateConfig
 
     def get_initial(self):
         initial = super(UpdateProjectView, self).get_initial()
-        default_value = setting.ConfigSetter()                
+        #default_value = setting.ConfigSetter()                
         #path = '/etc/tempest/tempest.conf'
         image_ref = default_value.get_setting('compute', 'image_ref')    
         flavor_ref = default_value.get_setting('compute', 'flavor_ref')
@@ -192,4 +176,58 @@ class UpdateProjectView(workflows.WorkflowView):
         initial['image_ref'] = image_ref
         initial['enabled'] = self.kwargs['event_id']
         self.event_id = self.kwargs['event_id']
+        return initial
+
+class UpdateView(workflows.WorkflowView):
+    workflow_class = project_workflows.UpdateTest
+    success_url = reverse_lazy("horizon:rally_dashboard:events:index")
+
+    def get_context_data(self, **kwargs):
+	"""
+	# | Function to get the context data
+   	# |
+    	# | Arguments: Kwargs: test_id
+    	# |
+    	# | Returns: Json object
+    	"""
+
+	#Getting the context data
+        context = super(UpdateView, self).get_context_data(**kwargs)
+	print("in get_context_data end")
+        context["test_id"] = kwargs['test_id'] 
+        return context
+
+    @memoized.memoized_method
+    def get_object(self, *args, **kwargs):
+	"""
+        # | Function to get the object
+        # |
+        # | Arguments: Kwargs, args
+        # |
+        # | Returns: Json object
+        """
+	
+        #Setting the test_id
+	test_id = self.kwargs['test_id']
+        try:
+            return api.nova.server_get(self.request, test_id)
+        except Exception:
+            redirect = reverse("horizon:rally_dashboard:events:index")
+            msg = _('Unable to retrieve instance details.')
+            exceptions.handle(self.request, msg, redirect=redirect)
+
+    def get_initial(self):
+	"""
+        # | Function to get the initial  data
+        # |
+        # | Arguments: Self
+        # |
+        # | Returns: Json object
+        """
+	
+	#Getting the initial data and setting it
+        initial = super(UpdateView, self).get_initial()
+	image_ref = default_value.get_setting('compute', 'image_ref')    
+        flavor_ref = default_value.get_setting('compute', 'flavor_ref')
+        initial.update({'test_id': self.kwargs['test_id'], 'image_ref': image_ref, 'flavor_ref': flavor_ref})
         return initial

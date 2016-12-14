@@ -23,8 +23,9 @@ from sqlalchemy.sql     import select
 from sqlalchemy         import Table, Column, Integer, String, MetaData, ForeignKey, DATETIME, Enum
 from sidecar            import exception
 from sqlalchemy.orm     import sessionmaker
-from sqlalchemy.dialects.mysql import LONGTEXT
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.mysql import LONGTEXT
+
 try:
     import simplejson as json
 except ImportError: 
@@ -64,7 +65,7 @@ class RallyModel():
                                )
 
     #Creating a configuration table
-    tests_list   = Table('tests_list', metadata,
+    tests_list = Table('tests_list', metadata,
                          Column('id', String(100), primary_key=True, unique=True, nullable=False),
                          Column('name', String(200), default='', nullable=False),
                          Column('project_id', Integer, ForeignKey('project_tests_list.id')),
@@ -75,7 +76,7 @@ class RallyModel():
                          Column('test_verified', String(100), nullable=True),
                          Column('test_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
                          Column('test_uuid', String(200), nullable=True),
-                         Column('results', LONGTEXT(), default='', nullable=False)
+                         Column('results', Text(), default='', nullable=False)
                          )
 
     #Test logs
@@ -85,6 +86,15 @@ class RallyModel():
                      Column('project_id', String(100), default='', nullable=False),
                      Column('test_status', Integer(), default='0', nullable=True)
                      )
+
+    #Test history
+    test_history = Table('test_history', metadata,
+			Column('id', String(100), primary_key=True, unique=True, nullable=False),
+ 			Column('testlist_id', String(100), ForeignKey('tests_list.id')),
+			Column('project_id', Integer(), default='0', nullable=False),		
+ 			Column('history_create_time', DATETIME, default='0000-00-00 00:00:00', nullable=False),
+			Column('results', LONGTEXT(), default='', nullable=False)
+			)
 
     #Creating the tables
     metadata.create_all(engine)
@@ -205,10 +215,13 @@ class RallyModel():
         if "test_uuid" in args['test_list']:
             data['test_uuid']  = args['test_list']['test_uuid']
         if "results" in args['test_list']:
-            data['results']  = args['test_list']['results']
-        
-        #Updating the data
-        update = self.tests_list.update().where(self.tests_list.c.id == test_id).values(data)
+            data['results']  = args['test_list']['results']	
+        if "update_null" in args['test_list']:
+	    data['test_added'] = '0'
+	    update = self.tests_list.update().where(self.tests_list.c.project_id == test_id).values(data)	
+	else:
+            #Updating the data
+            update = self.tests_list.update().where(self.tests_list.c.id == test_id).values(data)
         self.conn.execute(update)
         LOG.info("Test is updated succesfully.")
 
@@ -312,16 +325,13 @@ class RallyModel():
         # |
         # | Returns 
         """
-        LOG.info('get_test_log function+++++++')
-        LOG.info(project_id)
+
 	# Okay Bow lets start our query builder
         get_test_log = select([self.test_log])
-        LOG.info(get_test_log)
         LOG.info("Created the query to get the log of project.")
         #Making the search criteria
         if project_id != None:
             get_test_log = get_test_log.where(self.test_log.c.project_id == project_id)
-	    LOG.info(get_test_log)
         try:
             result = self.conn.execute(get_test_log)
         except Exception as e:
@@ -336,3 +346,228 @@ class RallyModel():
         log_data['project_id'] = row ['project_id']
         log_data['test_status'] = row ['test_status']
         return log_data
+
+    """***************************** history ********************************************"""
+    def create_test_history(self, kw):
+        """
+        name createTestHistory
+        Params: event data
+        Return : Json data
+        """
+
+        #Setting the parameters for the event creation
+        unique_id = uuid.uuid4().hex
+	LOG.info("History created with id 1111")
+	LOG.info(kw)
+        arg = {
+            "id": unique_id,
+            "testlist_id": kw['testlist_id'],
+            "project_id":  kw['project_id'],
+            "history_create_time": datetime.datetime.now(),
+            "results": kw['results']
+        }
+	
+	LOG.info(arg)
+        #Inserting the data
+        ins = self.test_history.insert().values(arg)
+	LOG.info(ins)
+        result = self.conn.execute(ins)
+        LOG.info("History created with id " + str(unique_id))
+        return unique_id
+    
+    def list_test_history(self, args={}):
+        """
+        # | Method to list the test history
+        # |
+        # | Arguments: Distionary containg the flter values
+        # |
+        # | Returns Distionary
+        """
+
+        #Setting the allowed args for the serach
+        allowed_args = [
+            'id',
+            'testlist_id',
+            'project_id',
+            'results', 
+            'history_create_time', 
+            'min_history_create_time',
+            'max_history_create_time', 
+            'marker',
+            'limit'
+        ]
+        valid_args = {}
+        for arg in args:
+            # | For each given argument
+            # | If it matches with allowed argument
+            # | Then treat it as valid arg
+            if arg in allowed_args:
+                valid_args[arg] = args[arg]
+
+        # Okay Bow lets start our query builder
+        get_history_list = select([self.test_history])
+           
+	#Iterating through each key 
+        for key in valid_args:
+            if type(valid_args[key])==bool:
+                val = valid_args[key]
+            else:
+                val = valid_args[key].strip()
+       
+            if not val:
+                continue;
+            if key == "id":
+                get_history_list = get_history_list.where(self.test_history.c.id == val)
+            if key == "testlist_id":
+                get_history_list = get_history_list.where(self.test_history.c.testlist_id.like('%' + val + '%'))
+            if key == "project_id":
+                get_history_list = get_history_list.where(self.test_history.c.project_id.like('%' + val + '%'))
+            if key == 'results':
+                get_history_list = get_history_list.where(self.test_history.c.results.like('%' + val + '%'))
+            if key == 'history_create_time':
+                get_history_list = get_history_list.where(self.test_history.c.history_create_time == val)
+            if key == 'min_history_create_time':
+                get_history_list = get_history_list.where(self.test_history.c.history_create_time >= val)
+            if key == 'max_history_create_time':
+                get_history_list = get_history_list.where(self.test_history.c.history_create_time <= val)
+        
+        LOG.info("Created the query with filter options.")
+        get_history_list = get_history_list.order_by(desc(self.test_history.c.history_create_time))
+        # As per the documentaion in
+        # https://specs.openstack.org/openstack/api-wg/guidelines/pagination_filter_sort.html
+        # we need to add pagination  only after the filtering. So lets just filter out it.
+        #
+        # Point to be noted, though it is a bad idea to fetch all the data from db (in worst case when
+        # there is no filter option), for time being we have done this way. Later we need to use sqlAlchemy
+	LOG.error(get_history_list)
+        try:
+            result = self.conn.execute(get_history_list)
+        except Exception as e:
+            LOG.error(str(e))
+            return []
+
+        #Getting the values are setting it in list
+        history_list = []
+        for row in result:
+            history_data = collections.OrderedDict()
+            history_data['id']                  = row['id']
+            history_data['testlist_id']         = row['testlist_id']
+            history_data['project_id']          = row['project_id']
+            history_data['history_create_time'] = row['history_create_time']
+            history_data['results']             = row['results']
+            history_data['moredata']            =  False
+            history_data['predata']             = True
+            history_list.append(history_data)
+ 
+        first_index = 0
+        if 'marker' in valid_args:
+            marker = valid_args['marker']
+            if marker is not None:
+                for (marker_index, history) in enumerate(history_list):
+                    if history['id'] == marker:
+                        # we start pagination after the marker
+                        first_index = marker_index + 1
+                        break        
+        limit = 10 
+
+        # Checking for the limit. If the given
+        # Limit is not positive then, return emepty result
+        if "limit" in valid_args:
+            if not valid_args["limit"].isnumeric():
+                return []
+            if not valid_args["limit"] > 0:
+                return []
+            limit = valid_args["limit"].strip()
+        limit = int(float(limit))
+        catch_limit = int(first_index) + int(limit)
+
+        #Adding the conditions to show previous or next links   
+        if limit > len(history_list):
+            #no need to display the next link and previous link
+            next_val = False
+            prev_val = False
+           
+        elif first_index > limit:
+            #need to display the previous link
+            prev_val = True
+           
+            #Case in each individual page other tahn the first page
+            if catch_limit < len(history_list):
+                #need to display the next link
+                next_val = True
+            else:
+                next_val = False
+        else:
+            #need to display the previous link as well as the next link
+            next_val = True
+
+            #No need to display the previous link in the first page
+            if first_index != 0:
+                prev_val = True
+            else:
+                prev_val = False
+
+        #Getting the event list with limit
+        history_list = history_list[first_index: catch_limit]
+
+        #Updating the moredata and predata with values
+        for i in range(0, len(history_list)):
+            history_list[i]['moredata'] = next_val
+            history_list[i]['predata'] = prev_val
+
+        LOG.info("Sending back the result.")
+        return history_list
+    
+    def get_test_history(self, history_id=None):
+        """
+        # | Function to get the detail of an event
+        # |
+        # | Arguments:
+        # |  <uuid>: Id of the event
+        # |
+        # | Returns: Json
+        """
+
+        #Getting the detail of the event
+	LOG.info(history_id)
+        get_history_select = select([self.test_history]).where(self.test_history.c.id.like('%' + history_id + '%'))
+	get_data = self.conn.execute(get_history_select)
+        LOG.info("Getting the history details")
+	LOG.info(get_history_select)
+	LOG.info(history_id)
+        
+	#Raise exception if no event is present else fetching the one
+        if not get_data.rowcount:
+            LOG.error("No history with id " + history_id + " found.")
+            raise exception.NotFound("No history with id " + history_id + " found.")
+        data = get_data.fetchone()
+        result = collections.OrderedDict()
+        result["id"]                  = history_id
+        result["testlist_id"]         = data["testlist_id"]
+        result["project_id"]          = data["project_id"]
+        result["history_create_time"] = data["history_create_time"]
+        result["results"]             = data["results"]
+        result['moredata']            = None
+        result['predata']             = None
+    
+        # If the proper data is there 
+        # then convert them into json
+        return result
+    
+    def delete_test_history(self, id):
+        """
+        # | Function to delete an test_history
+        # |
+        # | Arguments:
+        # |     <id>: id of the testlist_history
+        # |
+        # | Returns: None
+        """
+
+        # | Deleting the history using the id 
+        query = self.test_history.delete().where(self.test_history.c.id == id)
+        self.conn.execute(query)
+        LOG.info("Test list history is deleted succesfully.")
+
+    
+"""***************************** history ********************************************"""

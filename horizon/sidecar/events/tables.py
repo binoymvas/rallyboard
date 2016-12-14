@@ -146,4 +146,4 @@ class LogListTable(tables.DataTable):
         verbose_name = _("Test configuration")
         table_actions = ()
         row_class = UpdateRow
-        row_actions = (EditConf,)
+        row_actions = () #(EditConf,)

@@ -581,6 +581,87 @@ class TestLogGenerator(object):
         raise StopIteration()
 
 
+class TestHistory(object):
+    """
+    # | Class to provide History Object
+    """
+
+    # | id: id of the test history
+    # |
+    # | Default Value: None
+    # |
+    # | Type: String
+    id = None
+
+    # | testlist_id: Id of the test list
+    # |
+    # | Default Value: None
+    # |
+    # | Type: String
+    testlist_id = None
+
+    # | project_id: Project ID
+    # |
+    # | Default Value: None
+    # |
+    # | Type: List
+    project_id = None
+    
+    # | history_create_time: History create time in yyy-mm-dd HH:ii:ss format
+    # |
+    # | Default Value: None
+    # |
+    # | Type: string
+    history_create_time = None
+
+    # | result: Result string
+    # |
+    # | Default Value: None
+    # |
+    # | Type: string
+    results = None
+
+    def __init__(self, test_history):
+        """ Initialization Function """
+        self.id           	 = test_history['id']
+        self.testlist_id         = test_history['testlist_id']
+        self.project_id          = test_history['project_id']
+        self.history_create_time = test_history['history_create_time']
+        self.results 		 = test_history['results']
+        self.event_more          = test_history['moredata']
+        self.event_prev          = test_history['predata']
+
+class TestHistoryGenerator(object):
+    """ Result Generator object """
+
+    def __init__(self, test_history_list):
+        # | Intialziation function
+        # |
+        # | Arguments: test_history_list
+        # |
+        # | Returns None        
+	self._count = len(test_history_list['test_history'])
+        self._history = test_history_list['test_history']
+        self._position = 0
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return self._count
+
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        if self._position < self._count:
+            # | IF POSITION IS LESS THAN TOTAL ELEMT
+            # | Continue the looping
+            obj =  TestHistory(self._history[self._position])
+            self._position = self._position + 1
+            return obj
+        raise StopIteration()
+
 class EventsHttp(object):
     """
     # | Class to make api request
@@ -849,7 +930,7 @@ class EventsHttp(object):
         data = self._obj.http.get(url, headers)
         return TestResultsGenerator(data['body'])
 
-    def update_test(self, id=None, name=None, test_added=None, test_verified=None, test_uuid=None, results=None):
+    def update_test(self, id=None, name=None, test_added=None, test_verified=None, test_uuid=None, results=None, update_null=None):
         """
         # | Function to edit the event
         # |
@@ -860,6 +941,7 @@ class EventsHttp(object):
         # |     :test_added    <string>: whether the test is enabled or not
         # |     :test_verified <string>: whether the test has been executed or not
         # |     :results       <string>: the output obtained after test execution
+	# |     :update_null   <string>: to update 0 in test_added
         # | Returns:
         # |   None
         """
@@ -881,6 +963,8 @@ class EventsHttp(object):
             data["test_list"]["test_uuid"] = test_uuid
         if results:
             data["test_list"]["results"]   = results
+	if update_null:
+	    data["test_list"]["update_null"] = update_null
         data = self._obj.http.put(url, data, headers)
 
     def test_report(self, id=None, project_id=None):
@@ -948,3 +1032,107 @@ class EventsHttp(object):
         data = self._obj.http.post(url,  data, headers)
 	print('data', data)
 	return data
+
+    def list_test_history(self, id=None, testlist_id=None, project_id=None, history_create_time=None,
+        min_history_create_time=None, max_history_create_time=None, marker=None, limit=None):
+        """
+        # | Function to list the evenets
+        # |
+        # | Arguments: filter options
+        # |     :id          <string>: event id
+        # |     :testlist_id        <string>: name of the event
+        # |     :project_id   <string>: Host id
+        # |     :history_create_time <string in yyyy-mm-dd HH:ii::ss format>: Event create time
+        # |     :min_history_create_time <strimg in yyyy-mm-dd HH:ii::ss format>: Minimum time when the event was created
+        # |     :max_history_create_time <strimg in yyyy-mm-dd HH:ii::ss format>: Maximum time when the event was created
+        # |     :marker <last event id>: Minimum time when the event was created
+        # |     :limit  <integer>: Minimum time when the event was created
+        # |
+        # | Returns: Events generator object
+        """
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url     = self._obj.sidecar_url + '/evacuates/sidecarrally/testhistory?'
+                
+        # | Createing filter options
+        if id:
+            url = url + "id=%s&" % (id)
+        if testlist_id:
+            url = url + "testlist_id=%s&" % (testlist_id)
+        if project_id:
+            url = url + "project_id=%s&" % (project_id)
+        if history_create_time:
+            url = url + "history_create_time=%s&" % (history_create_time)
+        if min_history_create_time:
+            url = url + "min_history_create_time=%s&" % (min_history_create_time)
+        if max_history_create_time:
+            url = url + "max_history_create_time=%s&" % (max_history_create_time)
+        if marker:
+            url = url + "marker=%s&" % (marker)
+        if limit:
+            url = url + "limit=%s&" % (limit)
+
+        # | Make http request
+        data = self._obj.http.get(url, headers)
+        return TestHistoryGenerator(data['body'])
+
+    def create_test_history(self, testlist_id=None, project_id=None, results=None):
+        """
+        # | Function to create a new event
+        # |
+        # | Arguments: filter options
+        # |     :testlist_id <string>: testlist_id
+        # |     :project_id  <string>: project_id
+        # |     :results <strings> containg result html
+        # |
+        # | Returns: Event object
+        """
+
+	#Authenticating the post
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url = self._obj.sidecar_url + '/evacuates/sidecarrally/testhistory'
+
+	#Making the data to post
+        data = {
+            "history": {
+                "testlist_id": testlist_id,
+                "project_id": project_id,
+                "results": results
+            }
+        }
+        data = self._obj.http.post(url,  data, headers)
+        return TestHistory(data['body']['test_history'])
+
+    def get_test_history(self, id):
+        """
+        # | Function to get the detail of an event
+        # |
+        # | Arguments:
+        # |  :id <string> test history id
+        # |
+        # | Returns: history Object
+        """
+
+	#Authenticating and sending the get request
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url = self._obj.sidecar_url + '/evacuates/sidecarrally/testhistory/%s' %(id)
+        data = self._obj.http.get(url, headers)
+        return TestHistory(data['body']['test_history'])
+     
+    def delete_test_history(self, id):
+        """
+        # | Function to get the detail of an event
+        # |
+        # | Arguments:
+        # |  :id <string> history id
+        # |
+        # | Returns: history Object
+        """
+
+	#Authenticating and sending the delete request
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url = self._obj.sidecar_url + '/evacuates/sidecarrally/testhistory/%s' %(id)
+        data = self._obj.http.delete(url, headers) 
