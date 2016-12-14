@@ -1,0 +1,105 @@
+  NovaServers.boot_server:
+    - 
+      args: 
+        {{ vm_params(image_name, flavor_name) }}
+      runner: 
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context: 
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+  
+  NovaServers.boot_server_from_volume:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+        volume_size: "{{volume_size}}"
+        volume_type: "{{volume_type}}"
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+
+  NovaServers.list_servers:
+    -
+      args:
+        detailed: True
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+
+  NovaServers.boot_and_list_server:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+        detailed: True
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+    
+  NovaServers.boot_and_delete_server:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+        force-delete: false
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+      
+  NovaServers.snapshot_server:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+        force-delete: false
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+      
+  NovaServers.resize_server:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+        to_flavor: 
+          name: {{ image_name }} 
+        confirm: true
+        force_delete: false
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+
+  NovaServers.boot_and_live_migrate_server:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+        block_migration: false
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+    
+  NovaServers.boot_and_rebuild_server:
+    -
+      args:
+        {{ vm_params(flavor=flavor_name) }}
+        from_image:
+          name: "{{image_name}}"
+        to_image:
+          name: "{{image_name}}"
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+
+  NovaServers.boot_and_associate_floating_ip:
+    -
+      args:
+        {{ vm_params(image_name, flavor_name) }}
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+        network: {}
+

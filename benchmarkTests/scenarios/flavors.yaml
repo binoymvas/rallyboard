@@ -1,0 +1,58 @@
+  NovaFlavors.create_flavor:
+    -
+      args:
+        ram: 500
+        vcpus: 1
+        disk: 1
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+
+  NovaFlavors.list_flavors:
+    -
+      args:
+        detailed: True
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }} 
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+   
+  NovaFlavors.create_and_list_flavor_access:
+    -
+      args:
+        ram: 500
+        vcpus: 1
+        disk: 1
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+          
+  NovaFlavors.create_and_get_flavor:
+    -
+      args:
+        ram: 50
+        vcpus: 1
+        disk: 1
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+          
+  NovaFlavors.create_flavor_and_set_keys:
+    -
+      args:
+        ram: 500
+        vcpus: 1
+        disk: 1
+        extra_specs:
+      runner:
+        {{ constant_runner(concurrency=2*controllers_amount, times=10*controllers_amount) }}
+      context:
+        {{ user_context(tenants_amount, users_amount, use_existing_users) }}
+   
+        
+          
+  
+    
+        
+            
