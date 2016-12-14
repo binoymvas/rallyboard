@@ -342,6 +342,7 @@ class RallyTestController(RestController):
 		    LOG.info('nooooooooooooooooooooooo*************************')
 
                 elif str(project_id) == '2':
+	            self.update_testlog(project_id, '', 0)
                     test_output = self.executeBenchmarkTests(result)
                 else:
                     LOG.info('nooooooooooooooooooooooo')
@@ -459,20 +460,25 @@ class RallyTestController(RestController):
         task_file       = 'task.yaml'
         scenario        = yaml_path + task_file
         LOG.info(scenario)
-        LOG.info('Going to execute the command - rally task start '+ scenario +' --task-args \'{"service_list": ["hosts", "images"]}\'')
-        #output       = subprocess.call('rally task start '+ scenario +' --task-args \'{"service_list": ["hosts", "images"]}\'', shell=True)
-        cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ["hosts", "images"]}\''
-        res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
+        LOG.info('Going to execute the command - rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\'')
+        cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\''
+ 	res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
         output, err = res.communicate()
-        LOG.info(output)
+        LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
+        #LOG.info(output)
+        LOG.info('Inserting the details into test log table')
+        self.update_testlog(project_id, output, 0)
+        LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
         LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
         uuid = self.extractTestUUID(output)
         LOG.info(uuid)
         LOG.info('Updating the test uuid in the Database')
-        #update_uuid = sidecar.events.update_test(id = test_id, test_uuid = uuid)
-	kw = {}
-	kw['test_uuid'] = uuid
-	exec_test = self.rally_tests.update_test(test_id, kw)
+        kw = {}
+        kw['test_list'] = {}
+        kw['test_list']['test_uuid'] = uuid
+        kw['test_list']['results']   = test_report
+        #kw['test_uuid'] = uuid
+        exec_test = self.rally_tests.update_test(test_id, kw)
 	return True
 
     def extractVerificationUUID(self, output):
@@ -487,9 +493,9 @@ class RallyTestController(RestController):
         #extract the Verification UUID from the output
         replaced_output = output.replace('\n', ' ')
         LOG.info('+++++++++Replaced Output+++++++++')
-        LOG.info(replaced_output)
+        #LOG.info(replaced_output)
         match = re.findall('Verification UUID: (.*?) ', replaced_output)
-        LOG.info(match)
+        LOG.info(match[0])
         return match[0]
 
     def extractTestUUID(self, output):
@@ -504,9 +510,9 @@ class RallyTestController(RestController):
         #extract the test UUID from the output
         replaced_output = output.replace('\n', ' ')
         LOG.info('+++++++++Replaced Output+++++++++')
-        LOG.info(replaced_output)
+        #LOG.info(replaced_output)
         match = re.findall('rally task results (.*?) ', replaced_output)
-        LOG.info(match)
+        LOG.info(match[0])
         return match[0]
 
     def generateTestReport(self, test_id, test_uuid):
@@ -525,6 +531,27 @@ class RallyTestController(RestController):
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
         return output
+
+     def generateBenchmarkTestReport(self, test_id, test_uuid):
+         """
+         # | Generate the Test Report of Benchmark Tests using test uuid
+         # | <Arguments>:
+         # |    test_id: The id of the test which is to be executed
+         # |    test_uuid: UUID obtained after running the test
+         # | <Return>:
+         # |    test_report: a test report in html format
+         # |
+         """
+        LOG.info('Going to generate the test report')
+ 	LOG.info('@@@@@@@@@@@@@@@@@@@@@@')
+ 	LOG.info('Task UUID is ')
+ 	LOG.info(test_uuid)
+ 	LOG.info('@@@@@@@@@@@@@@@@@@@@@@')
+        report_cmd = 'rally task report '+ test_uuid +' --html'
+        LOG.info('Report command is '+ report_cmd)
+        p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
+        output, err = p.communicate()
+ 	LOG.info('Benchmarking test Report Has been Generated successfully')
 
 def exception_handle(e):
     """
