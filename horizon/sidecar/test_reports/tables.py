@@ -103,15 +103,40 @@ class DeleteReport(tables.DeleteAction):
         except Exception, e:
             return False
 
+def get_test_regex(tests_list):
+    """
+    # | Function to fetch the test_regex value from tests_list table
+    # | 
+    # | Tests_list object
+    # |
+    # | Returns string
+    """
+    if not tests_list.test_regex:
+        return '-'
+    return str(tests_list.test_regex)
+
+def get_test_service(tests_list):
+    """
+    # | Function to fetch the tests_service value from the tests_list table
+    # | 
+    # | Tests_list object
+    # |
+    # | Returns string
+    """
+    if not tests_list.test_service:
+        return '-'
+    return str(tests_list.test_service)
+
 class AllTestReportTable(tables.DataTable):
     """
-    #Table for displaying all the past reports after executing All Tests
+    # | Table for displaying all the past reports after executing All Tests
     """
-    test_name     = tables.Column('testlist_id', verbose_name=_('Test Name'), sortable=True)
-    test_service  = tables.Column('testlist_id', verbose_name=_('Service'), sortable=True)
-    test_time     = tables.Column('testlist_id', verbose_name=_('Time'), sortable=True)
-    
-    
+
+    #Columns which are to be displayed in the table
+    test_regex              = tables.Column(get_test_regex, verbose_name=_('Test Regex'), sortable=False)
+    test_service            = tables.Column(get_test_service, verbose_name=_('Service'), sortable=True)
+    history_create_time     = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
+   
     class Meta:
         name = "alltests"
         verbose_name  = _("All Tests")
@@ -121,11 +146,13 @@ class AllTestReportTable(tables.DataTable):
 
 class BenchmarkingTestReportTable(tables.DataTable):
     """
-    #Table for displaying all the past reports after executing Benchmarking Tests
+    # | Table for displaying all the past reports after executing Benchmarking Tests
     """
-    test_name     = tables.Column('name', verbose_name=_('Test Name'), sortable=True)
-    test_service  = tables.Column('name', verbose_name=_('Service'), sortable=True)
-    test_time     = tables.Column('name', verbose_name=_('Time'), sortable=True)
+
+    #Columns which are to be displayed in the table
+    test_regex              = tables.Column(get_test_regex, verbose_name=_('Test Regex'), sortable=False)
+    test_service            = tables.Column(get_test_service, verbose_name=_('Service'), sortable=True)
+    history_create_time     = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
 
     class Meta:
         name = "benchmarkingtests"

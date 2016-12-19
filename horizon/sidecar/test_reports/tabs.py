@@ -38,7 +38,6 @@ def sidecar_conn():
                   insecure = getattr(settings, "SC_INSECURE"))
     return _sidecar_
 
-
 class AllTestReportTab(tabs.TableTab):
     """
     Class to Display the reports after executing All tests
@@ -47,7 +46,6 @@ class AllTestReportTab(tabs.TableTab):
     slug = "all_test_report_listing"
     table_classes = (tables.AllTestReportTable, )
     template_name = ("horizon/common/_detail_table.html")
-    #template_name = ("horizon/openstack_dashboard/dashboard/sidecar/events/templates/events/test_reports.html")
     preload = False
     _has_prev = True
     _has_more = True
@@ -67,19 +65,9 @@ class AllTestReportTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
-            print('++++++++++++++++++++tabs.py file+++++++++++++++++++++++++')
-            #Fetching th reports of All Test Execution and returning it
-            #events = sidecar_conn().events.project_test_list()
-	    print("E1")
-	    events  = sidecar_conn().events.list_test_history()
-	    print('Enter 1')
-            print('++++++++++++++++++++++++++++++++++')
-	    #print(events)
-	    #print "".join([str(x) for x in events] )
-            #print '\n'.join(events)
-	    print('++++++++++++++++++++++++++++++++++')
+            #Fetching the reports of All Test Execution and returning it
+	    events  = sidecar_conn().events.list_test_history(project_id = 1)
             self.event_data = events
-	    print('enter 2')
             return list(events)
         except Exception, e:
             exceptions.handle(self.request, "Unable to fetch the reports.")
@@ -105,16 +93,15 @@ class BenchmarkingTestReportTab(tabs.TableTab):
 
     def get_benchmarkingtests_data(self):
         """
-        # | Function to get the data for All Report Listing
+        # | Function to get the data related to Benchmarking tests
         # |
         # | @Arguments: None
         # |
         # | @Return Type: Dictionary
         """
         try:
-            #Fetching th reports of All Test Execution and returning it
-            events = sidecar_conn().events.project_test_list()
-            self.event_data = events
+            #Fetching the reports of Benchmark Test Execution and returning it
+            events  = sidecar_conn().events.list_test_history(project_id = 2)
             self.event_data = events
             return list(events)
         except Exception, e:
@@ -159,6 +146,9 @@ class QATestReportTab(tabs.TableTab):
             return []
 
 class ReportDisplayTab(tabs.TabGroup):
+    """
+    # | Here, we set the tabs which are to be displayed in this page
+    """
     slug = "report_display_tab"
     tabs = (AllTestReportTab, BenchmarkingTestReportTab, QATestReportTab)
     sticky = True

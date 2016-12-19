@@ -405,9 +405,9 @@ class RallyModel():
                 valid_args[arg] = args[arg]
 
         # Okay Bow lets start our query builder
-        get_history_list = select([self.test_history])
+	get_history_list = select([self.test_history, self.tests_list.c.test_regex, self.tests_list.c.test_service], self.tests_list.c.id == self.test_history.c.testlist_id)
            
-	#Iterating through each key 
+	#Iterating through each key
         for key in valid_args:
             if type(valid_args[key])==bool:
                 val = valid_args[key]
@@ -455,7 +455,9 @@ class RallyModel():
             history_data['project_id']          = row['project_id']
             history_data['history_create_time'] = row['history_create_time']
             history_data['results']             = row['results']
-            history_data['moredata']            =  False
+            history_data['test_regex']          = row['test_regex']
+            history_data['test_service']        = row['test_service']
+            history_data['moredata']            = False
             history_data['predata']             = True
             history_list.append(history_data)
  
