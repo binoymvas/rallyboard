@@ -414,22 +414,32 @@ class RallyTestController(RestController):
 	    LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()
-	    LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
-	    LOG.info(output)
 	    self.update_testlog(project_id, output, 0)
-	    LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
-            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
+            
+	    #Extracting the uuid
+	    LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
             uuid = self.extractVerificationUUID(output)
-            LOG.info('Test UUID is ')
-	    LOG.info(uuid)            
+
+	    #Generating the report
             LOG.info('Executing the function for generating the report')
             test_report = self.generateTestReport(test_id, uuid)
             LOG.info('Updating the test details in the Database')
+	
+	    #Updating the test
 	    kw = {}
   	    kw['test_list'] = {}
   	    kw['test_list']['test_uuid'] = uuid
             kw['test_list']['results']   = test_report
             exec_test = self.rally_tests.update_test(test_id, kw)
+
+            #Making the dictionary for the history creation
+            history = {}
+            history['testlist_id'] = test_id
+            history['project_id'] = project_id
+            history['results'] = test_report
+            self.rally_tests.create_test_history(history)
+            LOG.info("Created the history for test report")
+
 	return True
 
     def update_testlog(self, project_id, output, status):

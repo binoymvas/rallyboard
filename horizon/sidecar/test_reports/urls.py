@@ -15,4 +15,5 @@ from openstack_dashboard.dashboards.sidecar.test_reports import views
 urlpatterns = patterns(
     '',
     url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^(?P<history_id>[^/]+)/testhistory/$', views.display_history_report, name="testhistory"),
 )
