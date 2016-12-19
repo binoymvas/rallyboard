@@ -621,6 +621,22 @@ class TestHistory(object):
     # | Type: string
     results = None
 
+    # | test_regex: Test regex name
+    # | 
+    # | Default Value: None
+    # | 
+    # | Type: string
+    # |
+ 
+    test_regex = None
+
+    # | test_service: Name of the service
+    # |
+    # | Default Value: None
+    # |
+    # | Type: String
+    # |
+
     def __init__(self, test_history):
         """ Initialization Function """
         self.id           	 = test_history['id']
@@ -630,6 +646,8 @@ class TestHistory(object):
         self.results 		 = test_history['results']
         self.event_more          = test_history['moredata']
         self.event_prev          = test_history['predata']
+	self.test_regex          = test_history['test_regex']
+        self.test_service        = test_history['test_service']
 
 class TestHistoryGenerator(object):
     """ Result Generator object """
@@ -884,6 +902,8 @@ class EventsHttp(object):
 
         # | Make http request
         data = self._obj.http.get(url, headers)
+	print('++++++++++++++++++++++++++++++++++++++++++Client Side+++++++++++++++++++++++')
+	print(data)
         return ProjectTestsGenerator(data['body'])
 
     def tests_list(self, id=None, name=None, project_id=None, test_service=None, test_scenario=None, test_regex=None, test_added=None, marker=None, limit=None):
@@ -1050,6 +1070,9 @@ class EventsHttp(object):
         # |
         # | Returns: Events generator object
         """
+	print('++++++++++++++++++++++++List Test History++++++++++++++++++++++++++')
+	print(project_id)
+	print('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         self._obj.authenticate()
         headers = {"X-Auth-Token":self._obj.authenticated_token}
         url     = self._obj.sidecar_url + '/evacuates/sidecarrally/testhistory?'
@@ -1074,6 +1097,8 @@ class EventsHttp(object):
 
         # | Make http request
         data = self._obj.http.get(url, headers)
+	print(data)
+	print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         return TestHistoryGenerator(data['body'])
 
     def create_test_history(self, testlist_id=None, project_id=None, results=None):
