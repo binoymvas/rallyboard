@@ -564,6 +564,7 @@ class RallyTestController(RestController):
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
  	LOG.info('Benchmarking test Report Has been Generated successfully')
+	return output
 
 def exception_handle(e):
     """
