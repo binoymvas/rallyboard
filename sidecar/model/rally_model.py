@@ -82,7 +82,7 @@ class RallyModel():
     #Test logs
     test_log = Table('tests_log', metadata,
                      Column('id', String(100), primary_key=True, unique=True, nullable=False),
-                     Column('log_data', Text(), default='', nullable=False),
+                     Column('log_data', LONGTEXT(), default='', nullable=False),
                      Column('project_id', String(100), default='', nullable=False),
                      Column('test_status', Integer(), default='0', nullable=True)
                      )
