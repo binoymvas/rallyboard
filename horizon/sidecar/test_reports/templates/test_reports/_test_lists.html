@@ -1,0 +1,76 @@
+{% load i18n %}
+{% csrf_token %}
+<script type="text/javascript">
+window.csrf_val = $("input[name='csrfmiddlewaretoken']").val();
+//Loading js after document ready
+$( document ).ready(function() {
+    $(document).on("click", "#run_tests", function() {
+	test_id = $("#test_id").val();
+        $.ajax({
+            beforeSend: function(xhr)  {
+                xhr.setRequestHeader('X-CSRFToken', window.csrf_val);  
+		$("#log_data").html("Tests arestarted  running. Please see the log for more details.");
+            },
+            type: 'POST',  
+                url: "/dashboard/rally_dashboard/"+test_id+"/runtests",
+            data: { 'test_id' : test_id},
+            success: function (xhr, ajaxOptions, thrownError) {
+  	        $("#log_data").html(xhr);
+            },
+            error: function (xhr, ajaxOptions, thrownError) {
+                //alert("failed");
+            }                
+        });
+
+	// To call the function to check whether any new alert is found
+	timeout = setInterval(function() {
+            test_id = $("#test_id").val();
+            $.ajax({
+                type: 'GET',
+                url: "/dashboard/rally_dashboard/get_log",
+		data: { 'project_id' : test_id},
+                success: function (xhr, ajaxOptions, thrownError) {
+                    $("#log_data").html(xhr);
+                },          
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert("failed");
+                }
+            });
+        }, 15000);
+    });
+});
+</script>
+<input type="hidden" name="test_id" id="test_id" value="{{test_id}}" />
+<div class="status detail">
+    <dl class="dl-horizontal">
+	<table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
+   	    <thead>
+        	<tr class="table_caption">
+		    <th class="table_header" colspan="9" data-column="0">
+			<div class="table_actions clearfix"><input type="submit" name="run_tests" id="run_tests" value="Run Tests"</div>
+	 	    </th>
+		</tr>
+		<tr class="tablesorter-headerRow">
+  	  	    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Name</div></th>
+	            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
+          	    <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>
+		    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Action</div></th>
+ 		</tr>
+	    </thead>
+	    <tbody>
+		{% for test in test_lists %}
+		    <tr class="{% cycle 'odd' 'even' %}" id="test_listing{{test.id}}" class="test_listing">
+			<td class="sortable normal_column">{{test.name}}</td>
+			<td class="sortable normal_column">{{test.test_regex}}</td>
+			<td class="sortable normal_column">{{test.test_uuid}}</td>
+ 		        <td class="sortable normal_column">
+			{% if test.report_url %}
+                            <a href="../{{test.report_url}}">Test Report</a>
+                        {% endif %}
+		    </tr>
+		{% endfor %}
+	    </tbody>
+	</table>
+    </dl>
+    <div id="log_data"></div>
+</div>
