@@ -55,3 +55,25 @@ class IndexView(tabs.TabbedTableView):
     template_name   = "rally_dashboard/test_reports/index.html"
     page_title      = "Rally Tests"
 
+def display_history_report(request, **kwargs):
+    """
+    # | Method to show the report 
+    # |
+    # | Arguments: 
+    # |   <kwargs>: Dictionary
+    # |
+    # | Returns: NA
+    """
+    
+    #Getting the histtory 
+    test_report =  sidecar.events.get_test_history(id=kwargs['history_id'])
+    test_result = ''
+    if test_report.results != None:
+        test_result = test_report.results
+
+    #Displaying the report
+    context = {
+        "page_title": _("Test Report"),
+        "test_report": test_result
+    }
+    return render(request, 'rally_dashboard/test_reports/view_report.html', context)

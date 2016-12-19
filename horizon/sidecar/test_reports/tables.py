@@ -8,12 +8,23 @@
 #
 # Copyright: 2016@nephoscale.com
 from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ungettext_lazy
 from horizon import tables
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.http import urlencode
 from openstack_dashboard import api
 from openstack_dashboard import policy
-
+from sidecarclient import client
+from django.conf import settings
+sidecar = client.Client(
+        username = getattr(settings, "SC_USERNAME"),
+        password = getattr(settings, "SC_PASSWORD"),
+        auth_url = getattr(settings, "SC_AUTH_URL"),
+        region_name = getattr(settings, "SC_REGION_NAME"),
+        tenant_name = getattr(settings, "SC_TENANT_NAME"),
+        timeout = getattr(settings, "SC_TIMEOUT"),
+        insecure = getattr(settings, "SC_INSECURE")
+    )
 
 class UpdateRow(tables.Row):
     ajax = True
@@ -58,20 +69,39 @@ class TestReport(tables.LinkAction):
 class ViewReport(tables.LinkAction):
     name = "viewreport"
     verbose_name = _("View Report")
-    url = "horizon:rally_dashboard:events:update"
+    url = "horizon:rally_dashboard:test_reports:testhistory"    
     classes = ("ajax-model",)
     icon = "pencil"
     policy_rules  = (("identity",  "identity:list_users"),
                      ("identity",  "identity:list_roles"))
 
-class DeleteReport(tables.LinkAction):
-    name ="deletereport"
-    verbose_name = _("Delete Report")
-    url = "horizon:rally_dashboard:events:update"
-    classes= ("ajax-model", )
-    icon  = "pencil"
-    policy_rules  = (("identity",  "identity:list_users"),
-                     ("identity",  "identity:list_roles"))
+class DeleteReport(tables.DeleteAction):
+    @staticmethod
+    def action_present(count):
+        return ungettext_lazy(
+            u"Delete History",
+            u"Delete History",
+            count
+        )
+
+    @staticmethod
+    def action_past(count):
+        return ungettext_lazy(
+            u"Deleted History",
+            u"Deleted History",
+            count
+        )
+    policy_rules = (("identity", "identity:delete_role"),)
+
+    def allowed(self, request, role):
+        return True
+
+    def delete(self, request, obj_id):
+        try:
+            sidecar.events.delete_test_history(id=obj_id)
+            return True
+        except Exception, e:
+            return False
 
 class AllTestReportTable(tables.DataTable):
     """
