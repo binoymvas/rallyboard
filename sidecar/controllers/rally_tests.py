@@ -500,6 +500,14 @@ class RallyTestController(RestController):
             kw['test_list']['test_uuid'] = uuid
             kw['test_list']['results']   = test_report
             exec_test = self.rally_tests.update_test(test_id, kw)
+
+            #Making the dictionary for the history creation
+            history = {}
+            history['testlist_id'] = test_id
+            history['project_id'] = project_id
+            history['results'] = test_report
+            self.rally_tests.create_test_history(history)
+            LOG.info("Created the history for test report")
             LOG.info('Completed')
         return True
 
