@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # _______________________________________________________
-# | File Name: rally_tests.py                           |
+# | File Name: RootController.py                        |
 # |                                                     |
 # | Package Name: Python-Sidecar REST API               |
 # |                                                     |
@@ -23,8 +23,6 @@ from oslo_config   import cfg
 import pecan, sidecar.validation as validation, ConfigParser, collections
 import subprocess
 import re
-import os
-
 
 try:
     import simplejson as json
@@ -62,6 +60,7 @@ class TestHistoryController(RestController):
         # | Returns: Dictonary
         """
         try:
+            LOG.info('Get function')
             rbac.enforce('get_detail', pecan.request) 
             result = self.rally_tests.get_test_history(testhistory_id)
             return { "test_history": result }
@@ -79,6 +78,7 @@ class TestHistoryController(RestController):
         # | @Returns: Json response
         """
         try:
+            LOG.info('get all function')
             rbac.enforce('list_events', pecan.request)
             test_histories = self.rally_tests.list_test_history(kw)
             return {"test_history": test_histories}
@@ -104,6 +104,9 @@ class TestHistoryController(RestController):
 	    #print(json_data)
 	    LOG.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")    
             data = kw['history']
+            LOG.info('creating test history with data')
+	    LOG.info(data)
+	    LOG.info('+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
             new_id = self.rally_tests.create_test_history(data)
             pecan.response.status = 201
             return { "test_history": self.rally_tests.get_test_history(new_id)}
@@ -324,28 +327,26 @@ class RallyTestController(RestController):
         try:
   	    
             #Getting the id of the project and getting the test details	   
-	    LOG.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
-	    LOG.info(kw)
-  	    LOG.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
 
 	    if 'id' in kw['project']:
 		project_id = kw['project']['id']
 		#rbac.enforce('get_test_details', pecan.request)
-		
-		#Getting the test details
+                LOG.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+	        #Getting the test details
                 result = self.rally_tests.get_test_details(project_id)
-	
-		#Callign the execution methods
+                LOG.info("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+		
+		#Calling the execution methods
         	if str(project_id) == '1':
  		    self.update_testlog(project_id, '', 0)
 		    test_output = self.executeAllTests(result)
-		    LOG.info('nooooooooooooooooooooooo---------------------')
-		    print(test_output)
-		    LOG.info('nooooooooooooooooooooooo*************************')
 
                 elif str(project_id) == '2':
+                    LOG.info('Project id is 2')
 	            self.update_testlog(project_id, '', 0)
-                    test_output = self.executeBenchmarkTests(result)
+                    LOG.info('Result is ')
+		    LOG.info(result)
+                    test_output = self.executeBenchmarkTests(result, project_id)
                 else:
                     LOG.info('nooooooooooooooooooooooo')
 		    LOG.info(project_id)
@@ -396,7 +397,6 @@ class RallyTestController(RestController):
 	    #    print(path, end="")
     """
 
-
     def executeAllTests(self, test_list):
         """
         # | Function to execute all tests
@@ -405,64 +405,6 @@ class RallyTestController(RestController):
         # |   
         # | @Return
         """
-        #execute All tests
-        LOG.info("Creating the file to save the list")
-        file_path = "/tmp/test_list.txt"
-        fp = open(file_path,"w")
-        os.chmod(file_path, 0777)
-
-        #Adding the test to the file
-        for row in test_list:
-            test_id    = row['id']
-            regex      = row['test_regex']
-            project_id = row['project_id']
-            fp.write(regex + '\n')
-            LOG.info("Adding test %s to the list", row['test_regex'])
-        fp.close
-        fp.flush()
-  
-     	#Entering to the loop and making the file execution
-        if os.path.isfile(file_path):
-            LOG.info('Entering the loop for All Tests section')
-
-            #Making the command for the test execution
-            cmd = 'rally verify start --system-wide --tests-file ' + file_path
-            LOG.info(cmd)
-            res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
-            output, err = res.communicate()
-            LOG.info(output)
-            #self.update_testlog(project_id, output, 0)
-            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
-            uuid = self.extractVerificationUUID(output)
-            LOG.info('Test UUID is ')
-            LOG.info(uuid)
-            LOG.info('Executing the function for generating the report')
-            test_report = self.generateTestReport(test_id, uuid)
-
-            LOG.info('Updating the test log with the log and the result.')
-            self.update_testlog(project_id, output, 0, test_report)
-
-            #Making the dictionary for the history creation
-            history = {}
-            history['testlist_id'] = test_id
-            history['project_id'] = project_id
-            history['results'] = test_report
-            self.rally_tests.create_test_history(history)
-            LOG.info("Created the history for test reporti")
-        return True
-
-
-
-
-    #def executeAllTests(self, test_list):
-        """
-        # | Function to execute all tests
-        # | 
-        # | @Arguments:
-        # |   
-        # | @Return
-        """
-	"""
         #execute All tests
         for row in test_list:
             test_id    = row['id']
@@ -502,42 +444,17 @@ class RallyTestController(RestController):
             LOG.info("Created the history for test report")
 
 	return True
-	"""
 
     def update_testlog(self, project_id, output, status, results=None):
-        """
-        # | Function to update the test log
-        # | 
-        # | @Arguments:
-        # |
-        # | @Return:    
-        """
-
-	#Making the dictionay for the log update
 	kw = {}
-        kw['log_data'] = newout
-        kw['test_status'] = status
-        kw['results'] = results
-        self.rally_tests.update_test_log(project_id, kw)
-
-	"""
-    def update_testlog(self, project_id, output, status):
-	kw = {}
-
-
-	previous_data = self.rally_tests.get_test_log(project_id)
 	LOG.info("###############################################################################")
-	#LOG.info(previous_data)
-	LOG.info(previous_data['log_data'])
-	LOG.info("###############################################################################")
-
-	newout = str(previous_data['log_data'] + str(output))
-	kw['log_data'] = newout
+        newout = output
+	kw['log_data']    = newout
 	kw['test_status'] = status
+        kw['results']     = results
 	self.rally_tests.update_test_log(project_id, kw)
-	"""
 
-    def executeBenchmarkTests(self, service_list):
+    def executeBenchmarkTests(self, service_list, project_id):
         """
         # | Function to execute Benchmarking Tests
         # | 
@@ -545,50 +462,47 @@ class RallyTestController(RestController):
         # |
         # | @Return:    
         """
+        services = []
         for row in service_list:
-            test_id       = row['id']
-            service_name  = row['test_regex']
-            project_id    = row['project_id']
+            services.append(row['test_regex'])
 
-            #execute Benchmark tests
-            #LOG.info(service_list)
-            LOG.info('service list printed above+++++++++++++++++++++++++')
-            LOG.info(project_id)
-            LOG.info('=========================================')
-            yaml_path       = '/home/benchmarkTests/'
-            task_file       = 'task.yaml'
-            scenario        = yaml_path + task_file
-            LOG.info(scenario)
-            LOG.info('Going to execute the command - rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\'')
-            cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ["'+ service_name +'"]}\''
-            res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
-            output, err = res.communicate()
-            LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
-            #LOG.info(output)
-            LOG.info('Inserting the details into test log table')
-            self.update_testlog(project_id, output, 0)
-            LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
-            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
-            uuid = self.extractTestUUID(output)
-            LOG.info('Test UUID is ')
-            LOG.info(uuid)
-            LOG.info('Executing the function for generating the report')
-            test_report = self.generateBenchmarkTestReport(test_id, uuid)
-            LOG.info('Updating the test details in the Database')
-            kw = {}
-            kw['test_list'] = {}
-            kw['test_list']['test_uuid'] = uuid
-            kw['test_list']['results']   = test_report
-            exec_test = self.rally_tests.update_test(test_id, kw)
+        LOG.info('Servcie list is ')
+	LOG.info(services)
 
-            #Making the dictionary for the history creation
-            history = {}
-            history['testlist_id'] = test_id
-            history['project_id'] = project_id
-            history['results'] = test_report
-            self.rally_tests.create_test_history(history)
-            LOG.info("Created the history for test report")
-            LOG.info('Completed')
+        #execute Benchmark tests
+        #LOG.info(service_list)
+        LOG.info('service list printed above+++++++++++++++++++++++++')
+        LOG.info(project_id)
+        LOG.info('=========================================')
+        yaml_path       = '/home/benchmarkTests/'
+        task_file       = 'task.yaml'
+        scenario        = yaml_path + task_file
+        #LOG.info(scenario)
+        cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + '}\''
+        LOG.info(cmd)
+        res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
+        output, err = res.communicate()
+        LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
+        LOG.info(output)
+        LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
+        uuid = self.extractTestUUID(output)
+        LOG.info('Test UUID is ')
+        LOG.info(uuid)
+        LOG.info('Executing the function for generating the report')
+        test_report = self.generateBenchmarkTestReport(uuid)
+        LOG.info('Updating the test details in the Database')
+        
+        LOG.info('Inserting the details into test log table')
+        self.update_testlog(project_id, output, 0, test_report)
+
+        #Making the dictionary for the history creation
+        history = {}
+        history['testlist_id'] = 'dsddsdsdsdsdsdss'
+        history['project_id'] = project_id
+        history['results'] = test_report
+        self.rally_tests.create_test_history(history)
+        LOG.info("Created the history for test report")
+        LOG.info('Completed')
         return True
 
     def extractVerificationUUID(self, output):
@@ -642,7 +556,7 @@ class RallyTestController(RestController):
         output, err = p.communicate()
         return output
 
-    def generateBenchmarkTestReport(self, test_id, test_uuid):
+    def generateBenchmarkTestReport(self, test_uuid):
         """
         # | Generate the Test Report of Benchmark Tests using test uuid
         # | <Arguments>:
