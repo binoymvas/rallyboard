@@ -237,19 +237,19 @@
         <tr>
           <td colspan="6" style="text-align:right; font-weight:bold">
             Filter tests by status:
-          <td class="checkbox status status-success" style="display:table-cell;" ng-click="set_filter('success')">
+          <td style="display:table-cell;" class="checkbox status status-success" ng-click="set_filter('success')">
             <span ng-hide="state.success">&#x2610;</span>
             <span ng-show="state.success">&#x2611;</span>
-          <td class="checkbox status status-skip" style="display:table-cell;" ng-click="set_filter('skip')">
+          <td style="display:table-cell;" class="checkbox status status-skip" ng-click="set_filter('skip')">
             <span ng-hide="state.skip">&#x2610;</span>
             <span ng-show="state.skip">&#x2611;</span>
-          <td class="checkbox status status-xfail" style="display:table-cell;"  ng-click="set_filter('xfail')">
+          <td class="checkbox status status-xfail" style="display:table-cell;" ng-click="set_filter('xfail')">
             <span ng-hide="state['xfail']">&#x2610;</span>
             <span ng-show="state['xfail']">&#x2611;</span>
-          <td class="checkbox status status-uxsuccess" style="display:table-cell;"  ng-click="set_filter('uxsuccess')">
+          <td class="checkbox status status-uxsuccess" ng-click="set_filter('uxsuccess')" style="display:table-cell;">
             <span ng-hide="state['uxsuccess']">&#x2610;</span>
             <span ng-show="state['uxsuccess']">&#x2611;</span>
-          <td class="checkbox status status-fail" style="display:table-cell;"  ng-click="set_filter('fail')">
+          <td class="checkbox status status-fail" ng-click="set_filter('fail')" style="display:table-cell;">
             <span ng-hide="state.fail">&#x2610;</span>
             <span ng-show="state.fail">&#x2611;</span>
         </tr>

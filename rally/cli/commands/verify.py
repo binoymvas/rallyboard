@@ -35,7 +35,6 @@ from rally.ui import report
 
 AVAILABLE_SETS = list(consts.TempestTestsSets) + list(consts.TempestTestsAPI)
 
-
 class VerifyCommands(object):
     """Verify an OpenStack cloud via Tempest.
 

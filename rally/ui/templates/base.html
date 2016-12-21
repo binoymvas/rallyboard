@@ -43,6 +43,13 @@
 </head>
 <body{% block body_attr %}{% endblock %}>
 
+  <div class="header" id="page-header">
+    <div class="content-wrap">
+      <a href="https://github.com/openstack/rally">Rally</a>&nbsp;
+      <span>{% block header_text %}{% endblock %}</span>
+    </div>
+  </div>
+
   <div class="content-wrap" id="page-content">
     {% block content %}{% endblock %}
   </div>
