@@ -643,6 +643,7 @@ class TestHistory(object):
     # |
     # | Type: String
     # |
+    test_service = None
 
     def __init__(self, test_history):
         """ Initialization Function """
