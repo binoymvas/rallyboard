@@ -68,7 +68,8 @@ def get_test_detail(request, **kwargs):
     context = {
         "page_title": _("Test Details"),
         "test_lists": report_list, #tests_listi
-	"test_id": kwargs['test_id']
+	"test_id": kwargs['test_id'],
+	"report_url": '../'+kwargs['test_id']+'/report'
     }
     return render(request, 'rally_dashboard/events/test_lists.html', context)
 
@@ -131,17 +132,49 @@ def get_log(request, **kwargs):
     }
     return render(request, 'rally_dashboard/events/test_logs.html', context)
 
-def get_test_report(request, **kwargs):
+def project_report(request, **kwargs):
+    """
+    # | Function to get the logs
+    # |
+    # | Arguments: Kwargs: prpoject id
+    # |
+    # | Returns: Json object
+    """
 
+    #Creating the command for the logs 
+    print("in the project_report ...........................................")
+    outputStr = "Updating the logs..."
+    #Making the output
+    context = {
+        "page_title": _("Test Details"),
+        "test_lists": 'report_list', #tests_list
+        "log_data": outputStr
+    }
+    return render(request, 'rally_dashboard/events/test_logs.html', context)
+
+
+def get_test_report(request, **kwargs):
+    """
+    # | Function to display the report to the user
+    # |
+    # | Arguments: Kwargs: project id
+    # | 
+    # | Returns: Json object
+    """ 
+	
     #Fetching the details of the selected event
     test_list = sidecar.events.test_report(project_id=kwargs['test_id'])
     report_list = []
+	
+    #Creating the list for the report
     for tests in test_list._logs:
 	json_test = json.loads(tests['data'])
 	tests['success'] = json_test['success'] 
 	tests['time'] = json_test['time']
 	tests['test_cases'] = json_test['test_cases']
 	report_list.append(tests)
+
+    #Making the context and sending to template
     context = {
         "page_title": _("Test Results"),
         "tests": report_list
@@ -149,16 +182,25 @@ def get_test_report(request, **kwargs):
     return render(request, 'rally_dashboard/events/test_detail.html', context)
 
 def display_report(request, **kwargs):
+    """
+    # | Function to display the report to the user
+    # |
+    # | Arguments: Kwargs: project id
+    # |
+    # | Returns: Json object
+    """
 
-    test_report = sidecar.events.test_report(id = kwargs['test_id'])
-    test_result = ''
-    for row in test_report._logs:
-        test_result  =  row['results']
-
-    #Displaying the report
+    #Getting the report of the tests 
+    try:
+        outputStr = sidecar.events.test_logs(project_id=kwargs['project_id'])
+        outputStr = outputStr.results
+    except Exception, e:
+        outputStr = "Updating the logs..."
+    
+    #Making the output
     context = {
         "page_title": _("Test Report"),
-        "test_report": test_result
+        "test_report": outputStr
     }
     return render(request, 'rally_dashboard/events/view_report.html', context)
 
@@ -231,3 +273,4 @@ class UpdateView(workflows.WorkflowView):
         flavor_ref = default_value.get_setting('compute', 'flavor_ref')
         initial.update({'test_id': self.kwargs['test_id'], 'image_ref': image_ref, 'flavor_ref': flavor_ref})
         return initial
+

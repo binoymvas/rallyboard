@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # _______________________________________________________
-# | File Name: RootController.py                        |
+# | File Name: rally_tests.py                           |
 # |                                                     |
 # | Package Name: Python-Sidecar REST API               |
 # |                                                     |
@@ -23,6 +23,8 @@ from oslo_config   import cfg
 import pecan, sidecar.validation as validation, ConfigParser, collections
 import subprocess
 import re
+import os
+
 
 try:
     import simplejson as json
@@ -394,6 +396,7 @@ class RallyTestController(RestController):
 	    #    print(path, end="")
     """
 
+
     def executeAllTests(self, test_list):
         """
         # | Function to execute all tests
@@ -402,6 +405,64 @@ class RallyTestController(RestController):
         # |   
         # | @Return
         """
+        #execute All tests
+        LOG.info("Creating the file to save the list")
+        file_path = "/tmp/test_list.txt"
+        fp = open(file_path,"w")
+        os.chmod(file_path, 0777)
+
+        #Adding the test to the file
+        for row in test_list:
+            test_id    = row['id']
+            regex      = row['test_regex']
+            project_id = row['project_id']
+            fp.write(regex + '\n')
+            LOG.info("Adding test %s to the list", row['test_regex'])
+        fp.close
+        fp.flush()
+  
+     	#Entering to the loop and making the file execution
+        if os.path.isfile(file_path):
+            LOG.info('Entering the loop for All Tests section')
+
+            #Making the command for the test execution
+            cmd = 'rally verify start --system-wide --tests-file ' + file_path
+            LOG.info(cmd)
+            res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
+            output, err = res.communicate()
+            LOG.info(output)
+            #self.update_testlog(project_id, output, 0)
+            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
+            uuid = self.extractVerificationUUID(output)
+            LOG.info('Test UUID is ')
+            LOG.info(uuid)
+            LOG.info('Executing the function for generating the report')
+            test_report = self.generateTestReport(test_id, uuid)
+
+            LOG.info('Updating the test log with the log and the result.')
+            self.update_testlog(project_id, output, 0, test_report)
+
+            #Making the dictionary for the history creation
+            history = {}
+            history['testlist_id'] = test_id
+            history['project_id'] = project_id
+            history['results'] = test_report
+            self.rally_tests.create_test_history(history)
+            LOG.info("Created the history for test reporti")
+        return True
+
+
+
+
+    #def executeAllTests(self, test_list):
+        """
+        # | Function to execute all tests
+        # | 
+        # | @Arguments:
+        # |   
+        # | @Return
+        """
+	"""
         #execute All tests
         for row in test_list:
             test_id    = row['id']
@@ -441,7 +502,25 @@ class RallyTestController(RestController):
             LOG.info("Created the history for test report")
 
 	return True
+	"""
 
+    def update_testlog(self, project_id, output, status, results=None):
+        """
+        # | Function to update the test log
+        # | 
+        # | @Arguments:
+        # |
+        # | @Return:    
+        """
+
+	#Making the dictionay for the log update
+	kw = {}
+        kw['log_data'] = newout
+        kw['test_status'] = status
+        kw['results'] = results
+        self.rally_tests.update_test_log(project_id, kw)
+
+	"""
     def update_testlog(self, project_id, output, status):
 	kw = {}
 
@@ -456,6 +535,7 @@ class RallyTestController(RestController):
 	kw['log_data'] = newout
 	kw['test_status'] = status
 	self.rally_tests.update_test_log(project_id, kw)
+	"""
 
     def executeBenchmarkTests(self, service_list):
         """

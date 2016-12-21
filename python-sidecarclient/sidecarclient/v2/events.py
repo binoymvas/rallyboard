@@ -527,6 +527,13 @@ class TestLogs(object):
     # | Type: text
     log_data = None
 
+    # | results:  HTML Results
+    # |
+    # | Default Value: None
+    # |
+    # | Type: Longtext
+    results = None
+
     # | project_id :  project_id in json format
     # |
     # | Default Value: None
@@ -547,7 +554,7 @@ class TestLogs(object):
  	self.log_data      = logs['log_data']
         self.project_id = logs['project_id']
         self.test_status = logs['test_status']
-
+	self.results = logs['results']
 
 class TestLogGenerator(object):
     """ Log Generator object """

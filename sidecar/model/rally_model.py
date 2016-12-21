@@ -83,7 +83,8 @@ class RallyModel():
     test_log = Table('tests_log', metadata,
                      Column('id', String(100), primary_key=True, unique=True, nullable=False),
                      Column('log_data', LONGTEXT(), default='', nullable=False),
-                     Column('project_id', String(100), default='', nullable=False),
+                     Column('results', LONGTEXT(), default='', nullable=False),
+		     Column('project_id', String(100), default='', nullable=False),
                      Column('test_status', Integer(), default='0', nullable=True)
                      )
 
@@ -343,7 +344,8 @@ class RallyModel():
         log_data = collections.OrderedDict()
 	log_data['id'] = row['id']
         log_data['log_data'] = row['log_data']
-        log_data['project_id'] = row ['project_id']
+        log_data['results'] = row['results']
+	log_data['project_id'] = row ['project_id']
         log_data['test_status'] = row ['test_status']
         return log_data
 

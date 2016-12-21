@@ -38,6 +38,6 @@ urlpatterns = patterns(
     url(r'^(?P<test_id>[^/]+)/update_list/$', views.UpdateView.as_view(), name='update_list'),
     url(r'^(?P<test_id>[^/]+)/testreport/$', views.get_test_report, name="test_report"),
     url(r'^(?P<event_id>[^/]+)/$', views.UpdateProjectView.as_view(), name='update'),
-    url(r'^(?P<test_id>[^/]+)/report/$', views.display_report, name="report"),
-    
+    url(r'^(?P<project_id>[^/]+)/report/$', views.display_report, name="report"),
+    url(r'^project_report/$', views.project_report, name="project_report"),    
 )
