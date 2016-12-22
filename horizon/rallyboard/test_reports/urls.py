@@ -1,0 +1,19 @@
+# _______________________________________________________________
+# |  File Name: urls.py                                         |
+# |                                                             |
+# | Software: Openstack Horizon Dashboard ['liberity']          |
+# |_____________________________________________________________|
+# |                                                             |
+# | Dashboard Name: RAlly Board                                 |
+# |                                                             |
+# | Copyright: 2016@nephoscale.com                              |
+# |_____________________________________________________________|
+from django.conf.urls import patterns
+from django.conf.urls import url
+from openstack_dashboard.dashboards.rallyboard.test_reports import views
+
+urlpatterns = patterns(
+    '',
+    url(r'^$', views.IndexView.as_view(), name='index'),
+    url(r'^(?P<history_id>[^/]+)/testhistory/$', views.display_history_report, name="testhistory"),
+)
