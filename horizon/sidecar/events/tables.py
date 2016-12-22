@@ -54,9 +54,7 @@ class UpdateRow(tables.Row):
 class Runtest(tables.LinkAction):
     name = "runtests"
     verbose_name = _("Run test ")
-    #url = "horizon:identity:projects:update"
     url = "horizon:rally_dashboard:events:update"
-    #classes = ("ajax-modal",)
     icon = "pencil"
     policy_rules = (("identity", "identity:list_users"),
                     ("identity", "identity:list_roles"))
@@ -64,24 +62,24 @@ class Runtest(tables.LinkAction):
     def get_link_url(self, testcase):
         step = 'runtest'
         base_url = reverse(self.url, args=[testcase.id])
-        #param = urlencode({"step": step})
         return base_url+step
 
 class TestReport(tables.LinkAction):
-    name = "testsreport"
-    verbose_name = _("Test Report")
+    name = "report"
+    verbose_name = _("View Report")
     url = "horizon:rally_dashboard:events:update"
     #classes = ("ajax-modal",)
     icon = "pencil"
     policy_rules = (("identity", "identity:list_users"),
                     ("identity", "identity:list_roles"))
 
+    def allowed(self, request, testcase=None):
+        return True
+
     def get_link_url(self, testcase):
-        step = 'testreport'
+        step = 'report'
         base_url = reverse(self.url, args=[testcase.id])
-        #param = urlencode({"step": step})
         return base_url+step
-	#return "?".join([base_url, step])
 
 class Edittestlist(tables.LinkAction):
     name = "edittestslist"
@@ -118,12 +116,6 @@ class EventListTable(tables.DataTable):
     TABLE TO LIST THE EVENTS
     """
     name = tables.Column('name', verbose_name=_('Name'), sortable=True, link='horizon:rally_dashboard:events:event_detail')
-    #status = tables.Column('event_status', verbose_name=_("Status"), sortable=True)
-    #transform_status
-    #status = tables.Column(transform_status, verbose_name=_("Status"), sortable=True)
-    #node_uuid   = tables.Column('node_uuid',   verbose_name=_("Node UUID"), sortable=True)
-    #event_create_time  = tables.Column('event_create_time', verbose_name=_('Created Time'), sortable=True)
-    #last_update    = tables.Column('event_complete_time', verbose_name=_("Last Updated"), sortable=True)
      
     class Meta:
         name = "events"

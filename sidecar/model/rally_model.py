@@ -369,7 +369,6 @@ class RallyModel():
             "results": kw['results']
         }
 	
-	LOG.info(arg)
         #Inserting the data
         ins = self.test_history.insert().values(arg)
 	LOG.info(ins)

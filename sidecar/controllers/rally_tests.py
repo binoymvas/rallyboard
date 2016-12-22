@@ -22,7 +22,9 @@ from oslo_log      import log
 from oslo_config   import cfg
 import pecan, sidecar.validation as validation, ConfigParser, collections
 import subprocess
+import shlex
 import re
+import os
 
 try:
     import simplejson as json
@@ -327,7 +329,6 @@ class RallyTestController(RestController):
         try:
   	    
             #Getting the id of the project and getting the test details	   
-
 	    if 'id' in kw['project']:
 		project_id = kw['project']['id']
 		#rbac.enforce('get_test_details', pecan.request)
@@ -372,31 +373,6 @@ class RallyTestController(RestController):
             LOG.error("Error in getting all the project tests.")
             return exception_handle(err)
 
-    """
-    def executeAllTests(self, test_list):
-
-	for row in test_list:
-            test_id  = row['id']
-            regex    = row['test_regex']
-            LOG.info('Entering the loop for All Tests section')
-            #output = subprocess.call('rally verify start --system-wide --regex ' + regex, shell=True)
-            cmd = 'rally verify start --system-wide --regex ' + regex + ' &'
-
-
-	    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
-	    for stdout_line in iter(popen.stdout.readline, ""):
-        	yield stdout_line
-
-	    popen.stdout.close()
-	    return_code = popen.wait()
-	    if return_code:
-        	raise subprocess.CalledProcessError(return_code, cmd)
-
-	    # Example
-	    #for path in execute(["locate", "a"]):
-	    #    print(path, end="")
-    """
-
     def executeAllTests(self, test_list):
         """
         # | Function to execute all tests
@@ -406,34 +382,41 @@ class RallyTestController(RestController):
         # | @Return
         """
         #execute All tests
+        LOG.info("Creating the file to save the list")
+        file_path = "/tmp/test_list.txt"
+        fp = open(file_path,"w")
+        os.chmod(file_path, 0777)
+
+        #Adding the test to the file
         for row in test_list:
             test_id    = row['id']
             regex      = row['test_regex']
-	    project_id = row['project_id']
+            project_id = row['project_id']
+            fp.write(regex + '\n')
+            LOG.info("Adding test %s to the list", row['test_regex'])
+        fp.close
+        fp.flush()
+
+        #Entering to the loop and making the file execution
+        if os.path.isfile(file_path):
             LOG.info('Entering the loop for All Tests section')
-            
-            #Setting the command which is to be executed
-            cmd = 'rally verify start --system-wide --regex ' + regex 
-	    LOG.info(cmd)
+
+            #Making the command for the test execution
+            cmd = 'rally verify start --system-wide --tests-file ' + file_path
+            LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()
-	    self.update_testlog(project_id, output, 0)
-            
-	    #Extracting the uuid
-	    LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
+            LOG.info(output)
+            #self.update_testlog(project_id, output, 0)
+            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
             uuid = self.extractVerificationUUID(output)
-
-	    #Generating the report
+            LOG.info('Test UUID is ')
+            LOG.info(uuid)
             LOG.info('Executing the function for generating the report')
             test_report = self.generateTestReport(test_id, uuid)
-            LOG.info('Updating the test details in the Database')
-	
-	    #Updating the test
-	    kw = {}
-  	    kw['test_list'] = {}
-  	    kw['test_list']['test_uuid'] = uuid
-            kw['test_list']['results']   = test_report
-            exec_test = self.rally_tests.update_test(test_id, kw)
+
+            LOG.info('Updating the test log with the log and the result.')
+	    self.update_testlog(project_id, output, 0, test_report)
 
             #Making the dictionary for the history creation
             history = {}
@@ -441,18 +424,44 @@ class RallyTestController(RestController):
             history['project_id'] = project_id
             history['results'] = test_report
             self.rally_tests.create_test_history(history)
-            LOG.info("Created the history for test report")
-
-	return True
+            LOG.info("Created the history for test reporti")
+        return True
 
     def update_testlog(self, project_id, output, status, results=None):
-	kw = {}
-	LOG.info("###############################################################################")
-        newout = output
-	kw['log_data']    = newout
-	kw['test_status'] = status
-        kw['results']     = results
-	self.rally_tests.update_test_log(project_id, kw)
+        kw = {}
+        LOG.info("###############################################################################")
+        if output != None:
+            kw['log_data'] = output
+        kw['test_status'] = status
+        if results != None:
+            kw['results']     = results
+        self.rally_tests.update_test_log(project_id, kw)
+
+    def execute_command(self, command, project_id, search_text):
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE)
+        uuid = ''
+        while True:
+            output = process.stdout.readline()
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                LOG.info("#####################################")
+                LOG.info(output.strip())
+                previous_data = self.rally_tests.get_test_log(project_id)
+                newout = str(previous_data['log_data'] + str(output))
+                self.update_testlog(project_id, newout, 0)
+                replaced_output = output.replace('\n', ' ')
+                LOG.info('+++++++++Replaced Output+++++++++')
+                match = re.findall('rally task results (.*?) ', replaced_output)
+                if len(match) > 0:
+                    uuid = match[0]
+                    LOG.info("uuid")
+                    LOG.info(uuid)
+                    LOG.info("uuid end ")
+
+                LOG.info("#####################################")
+        rc = process.poll()
+        return uuid
 
     def executeBenchmarkTests(self, service_list, project_id):
         """
@@ -468,7 +477,7 @@ class RallyTestController(RestController):
 
         LOG.info('Servcie list is ')
 	LOG.info(services)
-
+	self.update_testlog(project_id, '', 0, '')
         #execute Benchmark tests
         #LOG.info(service_list)
         LOG.info('service list printed above+++++++++++++++++++++++++')
@@ -478,33 +487,42 @@ class RallyTestController(RestController):
         task_file       = 'task.yaml'
         scenario        = yaml_path + task_file
         #LOG.info(scenario)
-        cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + '}\''
+        
+	cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + '}\''
+        LOG.info("~~~~~~~~~@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@~~~~~~~~~~~~~~~")
+        uuid = self.execute_command(cmd, project_id, 'rally task results (.*?) ')
+        LOG.info(uuid)
+        LOG.info("~~~~~~~~~@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@~~~~~~~~~~~~~~~end")
+        """
         LOG.info(cmd)
         res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
         output, err = res.communicate()
+        
         LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2 ")
         LOG.info(output)
         LOG.info("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2---------------------------------")
         uuid = self.extractTestUUID(output)
+        """
         LOG.info('Test UUID is ')
         LOG.info(uuid)
         LOG.info('Executing the function for generating the report')
         test_report = self.generateBenchmarkTestReport(uuid)
         LOG.info('Updating the test details in the Database')
-        
+
         LOG.info('Inserting the details into test log table')
-        self.update_testlog(project_id, output, 0, test_report)
+        self.update_testlog(project_id, None, 0, test_report)
 
         #Making the dictionary for the history creation
         history = {}
-        history['testlist_id'] = 'dsddsdsdsdsdsdss'
+        history['testlist_id'] = '48381965508b4b1494b48d67f727dc91'
         history['project_id'] = project_id
         history['results'] = test_report
         self.rally_tests.create_test_history(history)
+        LOG.info(history)
         LOG.info("Created the history for test report")
         LOG.info('Completed')
         return True
-
+    
     def extractVerificationUUID(self, output):
         """
         # | Function to extract the Verification UUID from the output after running the Tempests Tests

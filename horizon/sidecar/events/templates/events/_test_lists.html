@@ -17,11 +17,9 @@ $( document ).ready(function() {
             success: function (xhr, ajaxOptions, thrownError) {
   	        $("#log_data").html(xhr);
 		$("#view_reports").removeClass("disabled" );
-	        alert(" inserted");
             },
             error: function (xhr, ajaxOptions, thrownError) {
-                alert("failed");
-		$("#view_reports").addClass("disabled" );
+		//$("#view_reports").addClass("disabled" );
             }                
         });
 
@@ -51,7 +49,7 @@ $( document ).ready(function() {
         	<tr class="table_caption">
 		    <th class="table_header" colspan="9" data-column="0">
 			<div class="table_actions clearfix">
-			    <a href="{{report_url}}" type="button" class="btn btn-success disabled" id="view_reports">View Report</a>
+			    <a href="{{report_url}}" type="button" class="btn btn-success" id="view_reports">View Report</a>
 			    <button type="button" class="btn btn-primary" name="run_tests" id="run_tests">Run Tests</button>
 			</div>
 	 	    </th>

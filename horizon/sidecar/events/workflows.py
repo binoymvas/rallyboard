@@ -60,9 +60,10 @@ class UpdateTestListAction(workflows.MembershipAction):
 	    print("+++++++++++++++++++++++++++++++++++++++++")
 	    print(args)
 	    print(kwargs)
+	    print(args[0]['test_id'])
 	    print("+++++++++++++++++++++++++++++++++++++++++")
 
-            test_list = sidecar.events.tests_list(project_id=args[0]['test_id']) #kwargs['instance_id'])
+            test_list = sidecar.events.tests_list(project_id=args[0]['test_id'])
         except Exception:
             exceptions.handle(request, err_msg)
         tests_list = [(tests['id'], tests['test_scenario']) for tests in test_list._logs]

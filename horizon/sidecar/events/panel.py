@@ -15,4 +15,5 @@ import horizon
 class Events(horizon.Panel):
     name = _("Tasks")
     slug = "events"
+	
 dashboard.SidecarDashboard.register(Events)

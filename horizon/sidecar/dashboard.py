@@ -13,8 +13,8 @@ class SidecarDashboard(horizon.Dashboard):
     Class to register the Customer Support dashboard to horizon
     """
     name   = _("Rally Tests")
-    slug   = "rally_dashboard" #sidecar_dashboard"
-    panels = ('test_reports', 'events',) 
+    slug   = "rally_dashboard"
+    panels = ('events', 'test_reports', ) 
     default_panel = 'events'
     permissions = ('openstack.roles.admin',)
 

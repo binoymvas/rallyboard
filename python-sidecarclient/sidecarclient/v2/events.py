@@ -634,8 +634,7 @@ class TestHistory(object):
     # | 
     # | Type: string
     # |
- 
-    test_regex = None
+    #test_regex = None
 
     # | test_service: Name of the service
     # |
@@ -643,7 +642,7 @@ class TestHistory(object):
     # |
     # | Type: String
     # |
-    test_service = None
+    #test_service = None
 
     def __init__(self, test_history):
         """ Initialization Function """
@@ -654,8 +653,8 @@ class TestHistory(object):
         self.results 		 = test_history['results']
         self.event_more          = test_history['moredata']
         self.event_prev          = test_history['predata']
-	self.test_regex          = test_history['test_regex']
-        self.test_service        = test_history['test_service']
+	#self.test_regex          = test_history['test_regex']
+        #self.test_service        = test_history['test_service']
 
 class TestHistoryGenerator(object):
     """ Result Generator object """
