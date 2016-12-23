@@ -34,6 +34,56 @@ import datetime
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
+class TestConfigController(RestController):
+    """
+    # Class to handle the TestConfig settings
+    #
+    #
+    #
+    """
+    def __init__(self, data=None):
+        """
+        # | Initialization function
+        # | <Arguments>:
+        # |             None
+        # | Return Type: Void
+        # | 
+        """
+        self.rally_tests = rally_sql.RallyModel()
+
+    @expose(generic=True, template='json')
+    def get(self, option_name):
+        """
+        # | Method to get the Test Config details
+        # | Argument:
+        # |   <testconfig_id>: id from test config table
+        # | Return:
+        """
+        try:
+            LOG.info('Get function')
+            rbac.enforce('get_detail', pecan.request)
+            result = self.rally_tests.get_test_config_value(option_name)
+            return { "test_history": result }
+        except Exception as e:
+            return exception_handle(e)
+
+    @expose(generic=True, template='json')
+    def get_all(self, **kw):
+        """
+        # | Function to list the events
+        # |
+        # | @Arguments:
+        # |     <kw>: Url query parameters
+        # |
+        # | @Returns: Json response
+        """
+        try:
+            LOG.info('get all function')
+            test_configs = self.rally_tests.get_all_test_configs(kw)
+            return {"test_history": test_configs}
+        except Exception as err:
+            return exception_handle(err)
+
 class TestHistoryController(RestController):
     """
     # | Class to handel the REST API part of events in Evacuate 
@@ -475,9 +525,22 @@ class RallyTestController(RestController):
         for row in service_list:
             services.append(row['test_regex'])
 
-        LOG.info('Servcie list is ')
+        LOG.info('Service list is ')
 	LOG.info(services)
 	self.update_testlog(project_id, '', 0, '')
+      
+        LOG.info('Entering the config data check')
+
+        #Fetching the config values from DB
+        image_value   = self.rally_tests.get_test_config_value('image_name')
+        flavor_value  = self.rally_tests.get_test_config_value('flavor_name')
+
+        #config_data = self.rally_tests.get_all_test_configs()
+        LOG.info('################################################')
+        LOG.info(image_value)
+	LOG.info(flavor_value)
+        LOG.info('################################################')
+
         #execute Benchmark tests
         #LOG.info(service_list)
         LOG.info('service list printed above+++++++++++++++++++++++++')
@@ -486,9 +549,13 @@ class RallyTestController(RestController):
         yaml_path       = '/home/benchmarkTests/'
         task_file       = 'task.yaml'
         scenario        = yaml_path + task_file
-        #LOG.info(scenario)
+        LOG.info(scenario)
         
-	cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + '}\''
+	#cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + '}\''
+        cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + ', "image_name": ' + image_value + ', "flavor_name": '+ flavor_value + '}\''
+
+        LOG.info('Command is ')
+        LOG.info(cmd)
         LOG.info("~~~~~~~~~@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@~~~~~~~~~~~~~~~")
         uuid = self.execute_command(cmd, project_id, 'rally task results (.*?) ')
         LOG.info(uuid)
