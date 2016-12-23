@@ -925,6 +925,20 @@ class EventsHttp(object):
         data = {"event": {"name": 'name',"vm_uuid_list": 'vm_uuid_list',"node_uuid": 'node_uuid'}}
         data = self._obj.http.post(url,  data, headers)
 
+    def get_test_config(self, id=None, option=None, value=None):
+        """
+        # | Function to fetch the test config values
+        # | Arguments:
+        # | 
+        # | Return:
+        # |
+        """
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url     = self._obj.sidecar_url + '/evacuates/sidecarrally/testconfig?'
+        data    = self._obj.http.get(url, headers)
+        return TestConfigGenerator(data['body'])
+
     def evacuate_healthcheck_status(self):
         """
         # | Function to execute and fetch the healthcheck details for all events
