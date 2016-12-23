@@ -19,7 +19,6 @@ from horizon.utils import memoized
 from django.conf import settings
 from sidecarclient import client
 from django.conf import settings
-from pprint import pprint
 import requests
 import json
 from openstack_dashboard.dashboards.rallyboard.tasks import setting
