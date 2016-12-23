@@ -5,34 +5,34 @@ window.csrf_val = $("input[name='csrfmiddlewaretoken']").val();
 //Loading js after document ready
 $( document ).ready(function() {
     $(document).on("click", "#run_tests", function() {
-	test_id = $("#test_id").val();
+        test_id = $("#test_id").val();
         $.ajax({
             beforeSend: function(xhr)  {
                 xhr.setRequestHeader('X-CSRFToken', window.csrf_val);  
-		$("#log_data").html("Tests started. Please wait the log is loading...");
+                $("#log_data").html("Tests started. Please wait the log is loading...");
             },
             type: 'POST',  
                 url: "/dashboard/rally_dashboard/"+test_id+"/runtests",
             data: { 'test_id' : test_id},
             success: function (xhr, ajaxOptions, thrownError) {
-  	        $("#log_data").html(xhr);
-		$("#view_reports").removeClass("disabled" );
+                $("#log_data").html(xhr);
+                $("#view_reports").removeClass("disabled" );
             },
             error: function (xhr, ajaxOptions, thrownError) {
-		//$("#view_reports").addClass("disabled" );
-            }                
+                //$("#view_reports").addClass("disabled" );
+            }
         });
 
-	// To call the function to check whether any new alert is found
-	timeout = setInterval(function() {
+        // To call the function to check whether any new alert is found
+        timeout = setInterval(function() {
             test_id = $("#test_id").val();
             $.ajax({
                 type: 'GET',
                 url: "/dashboard/rally_dashboard/get_log",
-		data: { 'project_id' : test_id},
+                data: { 'project_id' : test_id},
                 success: function (xhr, ajaxOptions, thrownError) {
                     $("#log_data").html(xhr);
-                },          
+                },
                 error: function (xhr, ajaxOptions, thrownError) {
                     //alert("failed");
                 }
@@ -41,35 +41,35 @@ $( document ).ready(function() {
     });
 });
 </script>
-<input type="hidden" name="test_id" id="test_id" value="{{test_id}}" />
+<input type="hidden" name="test_id" id="test_id" value="{{test_id}}"/>
 <div class="status detail">
     <dl class="dl-horizontal">
-	<table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
-   	    <thead>
-        	<tr class="table_caption">
-		    <th class="table_header" colspan="9" data-column="0">
-			<div class="table_actions clearfix">
-			    <a href="{{report_url}}" type="button" class="btn btn-success" id="view_reports">View Report</a>
-			    <button type="button" class="btn btn-primary" name="run_tests" id="run_tests">Run Tests</button>
-			</div>
-	 	    </th>
-		</tr>
-		<tr class="tablesorter-headerRow">
-  	  	    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Name</div></th>
-	            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
-          	    <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>
- 		</tr>
-	    </thead>
-	    <tbody>
-		{% for test in test_lists %}
-		    <tr class="{% cycle 'odd' 'even' %}" id="test_listing{{test.id}}" class="test_listing">
-			<td class="sortable normal_column">{{test.name}}</td>
-			<td class="sortable normal_column">{{test.test_regex}}</td>
-			<td class="sortable normal_column">{{test.test_uuid}}</td>
-		    </tr>
-		{% endfor %}
-	    </tbody>
-	</table>
+        <table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
+            <thead>
+            <tr class="table_caption">
+                <th class="table_header" colspan="9" data-column="0">
+                    <div class="table_actions clearfix">
+                        <a href="{{report_url}}" type="button" class="btn btn-success" id="view_reports">View Report</a>
+                        <button type="button" class="btn btn-primary" name="run_tests" id="run_tests">Run Tests</button>
+                    </div>
+                </th>
+            </tr>
+            <tr class="tablesorter-headerRow">
+                <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Name</div></th>
+                <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
+                <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>
+            </tr>
+            </thead>
+            <tbody>
+                {% for test in test_lists %}
+                    <tr class="{% cycle 'odd' 'even' %}" id="test_listing{{test.id}}" class="test_listing">
+                        <td class="sortable normal_column">{{test.name}}</td>
+                        <td class="sortable normal_column">{{test.test_regex}}</td>
+                        <td class="sortable normal_column">{{test.test_uuid}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </dl>
     <div id="log_data"></div>
 </div>

@@ -14,6 +14,9 @@
 import ConfigParser
 import os
 import subprocess
+from django.conf import settings
+from sidecarclient import client
+_sidecar_ = None
 
 class ConfigSetter():
 
@@ -99,6 +102,28 @@ class ConfigSetter():
         #Deleting the details
         with open(self.path, "wb") as config_file:
             config.write(config_file)
+
+def sidecar_conn():
+    """
+    # | Function to make the connection with the sidecar
+    # |
+    # | Arguments: NA
+    # |
+    # | Returns: Connection string
+    """
+    
+    #Making the sidecar connection
+    global _sidecar_
+    if not _sidecar_:
+        _sidecar_ = client.Client(
+                  username = getattr(settings, "SC_USERNAME"),
+                  password = getattr(settings, "SC_PASSWORD"),
+                  auth_url = getattr(settings, "SC_AUTH_URL"),
+                  region_name = getattr(settings, "SC_REGION_NAME"),
+                  tenant_name = getattr(settings, "SC_TENANT_NAME"),
+                  timeout = getattr(settings, "SC_TIMEOUT"),
+                  insecure = getattr(settings, "SC_INSECURE"))
+    return _sidecar_
 
 def executeCommands(command, shellFlag = True, debug = False):
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

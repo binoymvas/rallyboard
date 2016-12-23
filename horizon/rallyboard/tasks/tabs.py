@@ -1,58 +1,42 @@
-# File Name: tabs.py
-#
-# @Software: Openstack Horizon
-#
-# @version: Liberity
-#
-# @Package: Sidecar 
-#
-# Start Date: 31th Aug 2016
+# ______________________________________________________________________
+# | File Name: tabs.py                                                  |
+# |                                                                     |
+# | This file is for handling the views of Rally tasks display          |
+# |_____________________________________________________________________|
+# | Start Date: Aug 31th, 2016                                          |
+# |                                                                     |
+# | Package: Openstack Horizon Dashboard [liberity]                     |
+# |                                                                     |
+# | Copy Right: 2016@nephoscale                                         |
+# |_____________________________________________________________________|
+
+#Importing the required packages
 from django.utils.translation import ugettext_lazy as _
 from horizon import tabs, exceptions
 from openstack_dashboard.dashboards.rallyboard.tasks import tables
 from django.core.urlresolvers import reverse_lazy, reverse
 from horizon.utils import memoized
-from django.conf import settings
-from sidecarclient import client
-from django.conf import settings
-from pprint import pprint
-import requests
-import json
 from openstack_dashboard.dashboards.rallyboard.tasks import setting
 default_value = setting.ConfigSetter()
+sidecar_conn = setting.sidecar_conn()
 
-#Making the connection to sidecar client
-_sidecar_ = None
-def sidecar_conn():
+class RallyConfig:
+    """ 
+    # | Class to handle the Configuration values
+    """
     
-    #Making the sidecar connection
-    global _sidecar_
-    if not _sidecar_:
-        _sidecar_ = client.Client(
-                  username = getattr(settings, "SC_USERNAME"),
-                  password = getattr(settings, "SC_PASSWORD"),
-                  auth_url = getattr(settings, "SC_AUTH_URL"),
-                  region_name = getattr(settings, "SC_REGION_NAME"),
-                  tenant_name = getattr(settings, "SC_TENANT_NAME"),
-                  timeout = getattr(settings, "SC_TIMEOUT"),
-                  insecure = getattr(settings, "SC_INSECURE"))
-    return _sidecar_
-
-
-class Invoice:
-
     def __init__(self, info):
         self.id = info['id']
         self.name = info['name']
         self.value = info['value']
 
-class LogListingTab(tabs.TableTab):
+class HistoryListingTab(tabs.TableTab):
     """ 
-    Class to handle the log listing
+    # | Class to handle the log listing
     """
     name = _("Test configuration")
     slug = "evacuate_logs"
-    table_classes = (tables.LogListTable, )
+    table_classes = (tables.TestConfigTable, )
     template_name = ("horizon/common/_detail_table.html")
     preload = True
     _has_more_data = False
@@ -67,63 +51,60 @@ class LogListingTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
-            logs = sidecar_conn().events.evacuate_healthcheck_status()
-            invoice_data = self.process_dict_and_display('test')
-            return invoice_data
-            return logs
+            rally_data = self.process_dict_and_display('test')
+            return rally_data
         except Exception, e:
-            return []        
+            return []
 
     # Process invoice dict and display
-    def process_dict_and_display(self, invoice):
+    def process_dict_and_display(self, values):
         """
-        Method: process_dict_and_display
-        desc: Method to create the dictionary with the data available
-        params:  self, invoice
-        return: invoice dictionary
+        # | Method: Method to create the dictionary with the data available
+        # | @Arguments: list of objects. 
+        #| 
+        # | @Return Type: dictionary
         """
         
         # Converting an Invoice Unicode to Dict
         image_ref = default_value.get_setting('compute', 'image_ref')
         flavor_ref = default_value.get_setting('compute', 'flavor_ref')
-        invoice = [{'id':'1', 'name': 'image_ref', 'value': image_ref}, {'id': 2, 'name': 'flavor_ref', 'value':flavor_ref}]
-        invoice_details_full = invoice
+        rally_config = [{'id':'1', 'name': 'image_ref', 'value': image_ref}, {'id': 2, 'name': 'flavor_ref', 'value':flavor_ref}]
+        rally_config_full = rally_config
         content = [] 
         
         # tenant based processing in invoicedata
-        for tenant_data in invoice_details_full:
+        for rally_data in rally_config_full:
+            
             # Assigned necessary values for reusing the same
             info = {}
-            info['id'] = tenant_data['id']
-            info['name'] = tenant_data['name']
-            info['value'] = tenant_data['value']
-            content.append(Invoice(info))
+            info['id'] = rally_data['id']
+            info['name'] = rally_data['name']
+            info['value'] = rally_data['value']
+            content.append(RallyConfig(info))
         return content
 
-class EventListingTab(tabs.TableTab):
+class RallyTestTab(tabs.TableTab):
     """ 
     Class to Display the Evacuation Events
     """
     name = _("Rally Tests")
     slug = "evacuation_events_listing"
-    table_classes = (tables.EventListTable, )
+    table_classes = (tables.TasksListTable, )
     template_name = ("horizon/common/_detail_table.html")
     preload = False
     _has_more = True
     _has_prev = True
 
     def has_more_data(self, table):
-        #Function to show the more link
-    	#if len(self.event_data._events) > 0:
-        #    return self.event_data._events[0]['moredata']
-        #else:
+        """
+        # | Function to show the more link
+        """
         return False
 
     def has_prev_data(self, table):
-        #function to show the previous link
-        #if len(self.event_data._events) > 0:
-        #    return self.event_data._events[0]['predata']
-        #else:
+        """
+        # | function to show the previous link
+        """
         return False
  
     def get_events_data(self):
@@ -137,31 +118,14 @@ class EventListingTab(tabs.TableTab):
         try:
             
             #Fetching the event list and returning it
-            events = sidecar_conn().events.project_test_list()
+            events = sidecar_conn.events.project_test_list()
             self.event_data = events
             return list(events)
         except Exception, e:
             exceptions.handle(self.request, "Unable to fetch events.")
             return []
 
-class Event:
-    name = uuid = event_status = event_create_time = event_complete_time = node_uuid = vm_uuid_list = extra = None
-
-def obj_dic(dict_values):
-    for values in dict_values:
-        value = Event()
-        value.id = values['id']
-        value.event_status = values['event_status']
-        value.node_uuid = values['node_uuid']
-        value.name = values['name']
-        value.event_complete_time = values['event_complete_time']
-        #value.uuid = values['uuid']
-        value.event_create_time = values['event_create_time']
-        value.vm_uuid_list = values['vm_uuid_list']
-        value.extra = values['extra']
-        yield value
-
-class EvacuationEventsTab(tabs.TabGroup):
+class RallyTab(tabs.TabGroup):
     slug = "evacuation_events_tab"
-    tabs = (EventListingTab, LogListingTab)
+    tabs = (RallyTestTab, HistoryListingTab)
     sticky = True

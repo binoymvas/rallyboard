@@ -2,30 +2,30 @@
 <div class="status detail">
     <hr class="header_rule">
     <dl class="dl-horizontal">
-	<table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
-   	    <thead>
-        	<tr class="table_caption">
-		    <th class="table_header" colspan="9" data-column="0">
-			<div class="table_actions clearfix"></div>
-	 	    </th>
-		</tr>
-		<tr class="tablesorter-headerRow">
-	            <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Updated at</div></th>
-  	  	    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Time</div></th>
-	            <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
-          	    <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">Verification uuid</div></th>
- 		</tr>
-	    </thead>
-	    <tbody>
-		{% for obj in tests %}
-		    <tr class="odd" data-object-id="4_o18r1.int.stage1.nephoscale.com" id="hypervisors__row__4_o18r1.int.stage1.nephoscale.com">
-			<td class="sortable normal_column">{{obj.updated_at}}</td>
-			<td class="sortable normal_column">{{obj.time}}</td>
-			<td class="sortable normal_column">{{obj.test_cases}}</td>
-			<td class="sortable normal_column">{{obj.verification_uuid}}</td>
-		    </tr>
-		{% endfor %}
-	    </tbody>
-	</table>
+        <table id="hypervisors" class="table datatable  tablesorter tablesorter-default">
+            <thead>
+                <tr class="table_caption">
+                    <th class="table_header" colspan="9" data-column="0">
+                        <div class="table_actions clearfix"></div>
+                    </th>
+                </tr>
+                <tr class="tablesorter-headerRow">
+                    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Updated at</div></th>
+                    <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Time</div></th>
+                    <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
+                    <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">Verification uuid</div></th>
+                </tr>
+        </thead>
+        <tbody>
+            {% for obj in tests %}
+                <tr class="odd" data-object-id="4_o18r1.int.stage1.nephoscale.com" id="hypervisors__row__4_o18r1.int.stage1.nephoscale.com">
+                    <td class="sortable normal_column">{{obj.updated_at}}</td>
+                    <td class="sortable normal_column">{{obj.time}}</td>
+                    <td class="sortable normal_column">{{obj.test_cases}}</td>
+                    <td class="sortable normal_column">{{obj.verification_uuid}}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
     </dl>
 </div>
