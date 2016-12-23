@@ -16,53 +16,25 @@ from openstack_dashboard import api
 from openstack_dashboard import policy
 from sidecarclient import client
 from django.conf import settings
+from openstack_dashboard.dashboards.rallyboard.tasks import setting
 import datetime
 
-sidecar = client.Client(
-        username = getattr(settings, "SC_USERNAME"),
-        password = getattr(settings, "SC_PASSWORD"),
-        auth_url = getattr(settings, "SC_AUTH_URL"),
-        region_name = getattr(settings, "SC_REGION_NAME"),
-        tenant_name = getattr(settings, "SC_TENANT_NAME"),
-        timeout = getattr(settings, "SC_TIMEOUT"),
-        insecure = getattr(settings, "SC_INSECURE")
-    )
+#Setting the connections
+sidecar_conn = setting.sidecar_conn()
 
 class UpdateRow(tables.Row):
+    """
+    # | Class to handle the row actions
+    """
     ajax = True
 
     def get_data(self, request):
         return '?'
-        project_info = api.keystone.tenant_get(request, '5a4fb03113d44f7590789f9aa9ff3619' , admin=True)
-        return project_info
-
-class Runtest(tables.LinkAction):
-    name = "runtests"
-    verbose_name = _("Run test ")
-    url = "horizon:rally_dashboard:test_reports:update"
-    icon = "pencil"
-    policy_rules = (("identity", "identity:list_users"),
-                    ("identity", "identity:list_roles"))
-
-    def get_link_url(self, testcase):
-        step = 'runtest'
-        base_url = reverse(self.url, args=[testcase.id])
-        return base_url+step
-
-class TestReport(tables.LinkAction):
-    name = "testsreport"
-    verbose_name = _("Test Report")
-    url = "horizon:rally_dashboard:test_reports:update"
-    icon = "pencil"
-    policy_rules = (("identity", "identity:list_users"),
-                    ("identity", "identity:list_roles"))
-
-    def get_link_url(self, testcase):
-        step = 'testreport'
-        base_url = reverse(self.url, args=[testcase.id])
-        return base_url+step
 
 class ViewReport(tables.LinkAction):
+    """
+    # | Class to handle the View Report
+    """
     name = "viewreport"
     verbose_name = _("View Report")
     url = "horizon:rally_dashboard:test_reports:testhistory"
@@ -73,7 +45,9 @@ class ViewReport(tables.LinkAction):
 
 
 class DeleteReport(tables.DeleteAction):
-    
+    """
+    # | Class to handle the Delete Report
+    """
     @staticmethod
     def action_present(count):
         return ungettext_lazy(
@@ -95,11 +69,11 @@ class DeleteReport(tables.DeleteAction):
         return True
 
     def delete(self, request, obj_id):
-	try: 
-  	    sidecar.events.delete_test_history(id=obj_id)
-	    return True
-	except Exception, e:
-	    return False
+        try: 
+            sidecar_conn.events.delete_test_history(id=obj_id)
+            return True
+        except Exception, e:
+            return False
 
 def get_test_regex(tests_list):
     """
@@ -109,16 +83,11 @@ def get_test_regex(tests_list):
     # |
     # | Returns string
     """
-    #if not tests_list.history_create_time:
-        #return '-'
-    time          = tests_list.history_create_time
-    dateStr       = datetime.datetime.strptime(time,'%Y-%m-%d %H:%M:%S')
-    date_in_words = dateStr.strftime('%B %d, %Y')
-
-    #words = datetime.date.strftime(time, "%a, %d %B %Y")
-    #dt_obj = datetime.datetime.strptime(testeddate,'%m/%d/%Y')
-    #test_regex  = 'BenchmarkTest_'+str(tests_list.history_create_time)
-    #return str(tests_list.test_regex)
+    
+    #Setting the display values
+    time = tests_list.history_create_time
+    date_str = datetime.datetime.strptime(time,'%Y-%m-%d %H:%M:%S')
+    date_in_words = date_str.strftime('%B %d, %Y')
     return 'Test of '+ date_in_words
 
 def get_test_service(tests_list):
@@ -129,6 +98,8 @@ def get_test_service(tests_list):
     # |
     # | Returns string
     """
+    
+    #Setting the service display value
     if not tests_list.test_service:
         return '-'
     return str(tests_list.test_service)
@@ -139,9 +110,8 @@ class AllTestReportTable(tables.DataTable):
     """
 
     #Columns which are to be displayed in the table
-    test_regex              = tables.Column(get_test_regex, verbose_name=_('Test Details'), sortable=False)
-    #test_service            = tables.Column(get_test_service, verbose_name=_('Service'), sortable=True)
-    history_create_time     = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
+    test_regex = tables.Column(get_test_regex, verbose_name=_('Test Details'), sortable=False)
+    history_create_time = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
    
     class Meta:
         name = "alltests"
@@ -156,10 +126,8 @@ class BenchmarkingTestReportTable(tables.DataTable):
     """
 
     #Columns which are to be displayed in the table
-    test_regex              = tables.Column(get_test_regex, verbose_name=_('Test Details'), sortable=False)
-    #test_service            = tables.Column(get_test_service, verbose_name=_('Service'), sortable=True)
-    history_create_time     = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
-    #test_regex              = tables.Column('Benchmark_'+ 'history_create_time', verbose_name=_('Test Regex'), sortable=False)
+    test_regex = tables.Column(get_test_regex, verbose_name=_('Test Details'), sortable=False)
+    history_create_time = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
 
     class Meta:
         name = "benchmarkingtests"
@@ -172,6 +140,8 @@ class QATestReportTable(tables.DataTable):
     """
     #Table for displaying all the past reports after executing Benchmarking Tests
     """
+
+    #Columns which are to be displayed in the table
     test_name     = tables.Column('name', verbose_name=_('Test Name'), sortable=True)
     test_service  = tables.Column('name', verbose_name=_('Service'), sortable=True)
     test_time     = tables.Column('name', verbose_name=_('Time'), sortable=True)
@@ -182,4 +152,3 @@ class QATestReportTable(tables.DataTable):
         table_actions = ()
         row_class  = UpdateRow
         row_actions = (ViewReport, DeleteReport)
-

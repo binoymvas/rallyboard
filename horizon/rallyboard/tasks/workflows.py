@@ -1,22 +1,16 @@
-# Copyright 2012 United States Government as represented by the
-# Administrator of the National Aeronautics and Space Administration.
-# All Rights Reserved.
-#
-# Copyright 2012 Nebula, Inc.
-#
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
-#
-#         http://www.apache.org/licenses/LICENSE-2.0
-#
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+# ______________________________________________________________________
+# | File Name: tabs.py                                                  |
+# |                                                                     |
+# | This file is for handling the views of Rally tasks display          |
+# |_____________________________________________________________________|
+# | Start Date: Aug 31th, 2016                                          |
+# |                                                                     |
+# | Package: Openstack Horizon Dashboard [liberity]                     |
+# |                                                                     |
+# | Copy Right: 2016@nephoscale                                         |
+# |_____________________________________________________________________|
 
-
+#Importing the required packages
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
@@ -28,18 +22,9 @@ from horizon import workflows
 from openstack_dashboard import api
 from openstack_dashboard.api import base
 from openstack_dashboard.dashboards.rallyboard.tasks import setting
-from sidecarclient import client
 
-sidecar = client.Client(
-        username = getattr(settings, "SC_USERNAME"),
-        password = getattr(settings, "SC_PASSWORD"),
-        auth_url = getattr(settings, "SC_AUTH_URL"),
-        region_name = getattr(settings, "SC_REGION_NAME"),
-        tenant_name = getattr(settings, "SC_TENANT_NAME"),
-        timeout = getattr(settings, "SC_TIMEOUT"),
-        insecure = getattr(settings, "SC_INSECURE")
-    )
-
+#Making the sidecar connection
+sidecar_conn = setting.sidecar_conn()
 default_setting = setting.ConfigSetter()
 INSTANCE_SEC_GROUP_SLUG = "update_security_groups"
 
@@ -49,15 +34,14 @@ class UpdateTestListAction(workflows.MembershipAction):
         err_msg = _('Unable to retrieve security group list. Please try again later.')
         context = args[0]
         test_id = context.get('test_id', '')
-
         default_role_name = self.get_default_role_field_name()
         self.fields[default_role_name] = forms.CharField(required=False)
         self.fields[default_role_name].initial = 'member'
 
         # Get list of available security groups
         all_groups = []
-	try:
-            test_list = sidecar.events.tests_list(project_id=args[0]['test_id'])
+        try:
+            test_list = sidecar_conn.events.tests_list(project_id=args[0]['test_id'])
         except Exception:
             exceptions.handle(request, err_msg)
         tests_list = [(tests['id'], tests['test_scenario']) for tests in test_list._logs]
@@ -65,10 +49,10 @@ class UpdateTestListAction(workflows.MembershipAction):
         field_name = self.get_member_field_name('member')
         self.fields[field_name] = forms.MultipleChoiceField(required=False)
         self.fields[field_name].choices = tests_list #groups_list
-	self.fields[field_name].initial = []
-	for tests in test_list._logs:
-	    if tests['test_added'] == 1:
-      	        self.fields[field_name].initial.append(tests['id']) 
+        self.fields[field_name].initial = []
+        for tests in test_list._logs:
+            if tests['test_added'] == 1:
+                self.fields[field_name].initial.append(tests['id']) 
 
     def handle(self, request, data):
         test_id = data['test_id']
@@ -103,12 +87,12 @@ class UpdateConfigAction(workflows.Action):
 
     def handle(self, request, data):
         try:
-	    default_setting.update_setting('compute', 'image_ref', data['image_ref'])
+            default_setting.update_setting('compute', 'image_ref', data['image_ref'])
             default_setting.update_setting('compute', 'flavor_ref', data['flavor_ref'])
-	    sidecar.events.update_test(id=data['test_id'], update_null='1')
-	    for tests_id in data['wanted_tests']:
+            sidecar_conn.events.update_test(id=data['test_id'], update_null='1')
+            for tests_id in data['wanted_tests']:
                 try:
-                    sidecar.events.update_test(id=tests_id, test_added='1')
+                    sidecar_conn.events.update_test(id=tests_id, test_added='1')
                 except exceptions.Conflict:
                     msg = _('Test with id "%s" is already used.') % tests_id
                     self.failure_message = msg

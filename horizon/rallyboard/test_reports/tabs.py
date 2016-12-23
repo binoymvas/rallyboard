@@ -1,12 +1,16 @@
-# File Name: tabs.py
-#
-# @Software: Openstack Horizon
-#
-# @version: Liberity
-#
-# @Package: Sidecar 
-#
-# Start Date: 31th Aug 2016
+# ______________________________________________________________________
+# | File Name: tabs.py                                                  |
+# |                                                                     |
+# | This file is for handling the views of Rally tasks display          |
+# |_____________________________________________________________________|
+# | Start Date: Aug 31th, 2016                                          |
+# |                                                                     |
+# | Package: Openstack Horizon Dashboard [liberity]                     |
+# |                                                                     |
+# | Copy Right: 2016@nephoscale                                         |
+# |_____________________________________________________________________|
+
+#Importing the required packages
 from django.utils.translation import ugettext_lazy as _
 from horizon import tabs, exceptions
 from openstack_dashboard.dashboards.rallyboard.test_reports import tables
@@ -18,26 +22,11 @@ from django.conf import settings
 from pprint import pprint
 import requests
 import json
-from openstack_dashboard.dashboards.rallyboard.test_reports import setting
-default_value = setting.ConfigSetter()
+from openstack_dashboard.dashboards.rallyboard.tasks import setting
 
 #Making the connection to sidecar client
-_sidecar_ = None
-def sidecar_conn():
-    
-    #Making the sidecar connection
-    global _sidecar_
-    if not _sidecar_:
-        _sidecar_ = client.Client(
-                  username = getattr(settings, "SC_USERNAME"),
-                  password = getattr(settings, "SC_PASSWORD"),
-                  auth_url = getattr(settings, "SC_AUTH_URL"),
-                  region_name = getattr(settings, "SC_REGION_NAME"),
-                  tenant_name = getattr(settings, "SC_TENANT_NAME"),
-                  timeout = getattr(settings, "SC_TIMEOUT"),
-                  insecure = getattr(settings, "SC_INSECURE"))
-    return _sidecar_
-
+default_value = setting.ConfigSetter()
+sidecar_conn = setting.sidecar_conn()
 
 class AllTestReportTab(tabs.TableTab):
     """
@@ -47,7 +36,6 @@ class AllTestReportTab(tabs.TableTab):
     slug = "all_test_report_listing"
     table_classes = (tables.AllTestReportTable, )
     template_name = ("horizon/common/_detail_table.html")
-    #template_name = ("horizon/openstack_dashboard/dashboard/sidecar/events/templates/events/test_reports.html")
     preload = False
     _has_prev = True
     _has_more = True
@@ -67,10 +55,11 @@ class AllTestReportTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
+            
             #Fetching the reports of All Test Execution and returning it
-	    events  = sidecar_conn().events.list_test_history(project_id = 1)
-            self.event_data = events
-            return list(events)
+            all_report  = sidecar_conn.events.list_test_history(project_id = 1)
+            self.event_data = all_report
+            return list(all_report)
         except Exception, e:
             exceptions.handle(self.request, "Unable to fetch the reports.")
             return []
@@ -102,10 +91,11 @@ class BenchmarkingTestReportTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
+            
             #Fetching the reports of Benchmark Test Execution and returning it
-            events  = sidecar_conn().events.list_test_history(project_id = 2)
-            self.event_data = events
-            return list(events)
+            benchmark_history  = sidecar_conn.events.list_test_history(project_id = 2)
+            self.event_data = benchmark_history
+            return list(benchmark_history)
         except Exception, e:
             exceptions.handle(self.request, "Unable to fetch the reports.")
             return []
@@ -137,12 +127,12 @@ class QATestReportTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
+            
             #Fetching th reports of QA Test Execution and returning it
-            events = sidecar_conn().events.project_test_list()
-            self.event_data = events
+            qa_report = sidecar_conn.events.project_test_list()
+            self.event_data = qa_report
             events = []
-            return events
-            #return "testttt"
+            return qa_report
         except Exception, e:
             exceptions.handle(self.request, "Unable to fetch the reports.")
             return []
