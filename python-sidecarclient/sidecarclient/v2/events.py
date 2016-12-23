@@ -587,6 +587,68 @@ class TestLogGenerator(object):
             return obj
         raise StopIteration()
 
+class TestConfig(object):
+    """
+    # | Class related to TestConfig entries
+    # | 
+    """
+
+    # | id :  config id
+    # |
+    # | Default Value: None
+    # |
+    id     = None
+
+    # | option :  option name in string format
+    # |
+    # | Default Value: None
+    # |
+    option = None
+
+    # | value :  value corresponding to the option
+    # |
+    # | Default Value: None
+    # |
+    value  = None
+
+    def __init__(self, test_config):
+
+        """ Initialization Function """
+        self.id             = test_config['id']
+        self.option         = test_config['option']
+        self.value          = test_config['value']
+
+
+class TestConfigGenerator(object):
+    """ Result Generator object """
+
+    def __init__(self, test_config_list):
+        # | Intialziation function
+        # |
+        # | Arguments: test_config_list
+        # |
+        # | Returns None        
+        self._count = len(test_config_list['test_config'])
+        self._config = test_config_list['test_config']
+        self._position = 0
+
+    def __iter__(self):
+        return self
+
+    def __len__(self):
+        return self._count
+
+    def __next__(self):
+        return self.next()
+
+    def next(self):
+        if self._position < self._count:
+            # | IF POSITION IS LESS THAN TOTAL ELEMT
+            # | Continue the looping
+            obj =  TestConfig(self._config[self._position])
+            self._position = self._position + 1
+            return obj
+        raise StopIteration()
 
 class TestHistory(object):
     """
