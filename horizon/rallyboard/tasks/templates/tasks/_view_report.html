@@ -15,6 +15,6 @@ $(window).load(function() {
     $(".loader").fadeOut("slow");
 });
 </script>
-<div id="testing">{{test_report | safe}}</div>
+<div id="testing">{{test_report| safe|default:"No report available."}}</div>
 <script src="/dashboard/static/horizon/lib/jquery/b_jquery.js"></script>
 <div class="loader"></div>
