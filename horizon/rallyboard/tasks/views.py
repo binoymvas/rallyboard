@@ -99,7 +99,7 @@ def get_log(request, **kwargs):
         
         #Getting the logs using the project id 
         output_str = sidecar_conn.events.test_logs(project_id=request.GET['project_id'])
-        log_data = outputStr.log_data
+        log_data = output_str.log_data
         output_str = " <br>".join(log_data.split("\n"))
     except Exception, e:
         output_str = "Updating the logs..."

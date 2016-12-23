@@ -19,7 +19,6 @@ from horizon import tabs
 from horizon import exceptions
 from horizon.utils import memoized
 from horizon import workflows
-from openstack_dashboard.dashboards.rallyboard.test_reports import workflows as project_workflows
 from openstack_dashboard.dashboards.rallyboard.tasks import setting
 
 #Setting the connections
