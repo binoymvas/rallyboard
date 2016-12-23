@@ -97,6 +97,13 @@ class RallyModel():
 			Column('results', LONGTEXT(), default='', nullable=False)
 			)
 
+    #Test Config table
+    test_config = Table('test_config', metadata,
+                       Column('id', Integer, primary_key=True, nullable=False),
+                       Column('option_name', String(255), default='', nullable=False),
+                       Column('value', String(255), default='', nullable=False)
+                       )
+
     #Creating the tables
     metadata.create_all(engine)
     LOG.info("Created the rally tables.)")
@@ -348,6 +355,75 @@ class RallyModel():
 	log_data['project_id'] = row ['project_id']
         log_data['test_status'] = row ['test_status']
         return log_data
+
+    """*****************************Test Config******************************************"""
+    def create_test_config(self, kw):
+        """
+        # | Adding new configuration values
+        # | <Arguments>:
+        # |  
+        # | <Return>:
+        # | 
+        """
+        args = {
+                "option": kw['option'],
+                "value":  kw['value']
+               }
+        LOG.info(args)
+        #Inserting the data
+        ins = self.test_config.insert().values(args)
+        LOG.info(ins)
+        result = self.conn.execute(ins)
+        LOG.info("A new config option has been added to the DB")
+        return True
+
+    def get_test_config_value(self, option_name):
+        """
+        # | Function to fetch the config value corresponding to an option
+        # | <Arguments>:
+        # |     option_name : The name of the option for which we need to fetch the value from DB
+        # | <Return>:
+        # |     result:Value corresponding to the option from the DB
+        """
+        LOG.info('Entering the function - get_test_config_value')
+        LOG.info('Fetching the option value from the DB')
+        get_test_config_value = select([self.test_config]).where(self.test_config.c.option_name == option_name)
+        result = self.conn.execute(get_test_config_value)
+        for row in result:
+            LOG.info('Entering the for loop to fetch the config value')
+            config_value = row['value']
+        LOG.info('The value corresponding to this option name is ')
+        LOG.info(config_value)
+        return config_value
+
+
+    def get_all_test_configs(self):
+        """
+        # | Function to fetch the config value corresponding to an option
+        # | <Arguments>:
+        # |     
+        # | <Return>:
+        # |     
+        """
+        get_test_configs = select([self.test_config]).order_by(asc(self.test_config.c.id))
+        try:
+            result = self.conn.execute(get_test_configs)
+        except Exception as e:
+            LOG.error(str(e))
+            return []
+
+        #Getting the values and storing it in a list
+        config_list = []
+        for row in result:
+            config_data = collections.OrderedDict()
+            config_data['id']                  = row['id']
+            config_data['option_name']         = row['option_name']
+            config_data['value']               = row['value']
+            config_list.append(config_data)
+        LOG.info('Sending back the result')
+        return config_list
+
+    """***************************** Test Config Ends Here ******************************"""
 
     """***************************** history ********************************************"""
     def create_test_history(self, kw):
