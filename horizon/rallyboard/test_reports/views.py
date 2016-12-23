@@ -33,7 +33,7 @@ class IndexView(tabs.TabbedTableView):
     """
     tab_group_class = history_tabs.ReportDisplayTab
     template_name   = "rally_dashboard/test_reports/index.html"
-    page_title      = "Rally Tests"
+    page_title      = "Rally Tests History"
 
 
 def display_history_report(request, **kwargs):
