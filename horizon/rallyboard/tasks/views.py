@@ -235,7 +235,11 @@ class UpdateView(workflows.WorkflowView):
 
         #Getting the initial data and setting it
         initial = super(UpdateView, self).get_initial()
-        image_ref = default_value.get_setting('compute', 'image_ref')    
-        flavor_ref = default_value.get_setting('compute', 'flavor_ref')
+        #image_ref = default_value.get_setting('compute', 'image_ref')    
+        #flavor_ref = default_value.get_setting('compute', 'flavor_ref')
+
+        image_ref  = sidecar_conn.events.get_test_config_value(option_name='image_name')
+        flavor_ref  = sidecar_conn.events.get_test_config_value(option_name='flavor_name')
+	
         initial.update({'test_id': self.kwargs['test_id'], 'image_ref': image_ref, 'flavor_ref': flavor_ref})
         return initial

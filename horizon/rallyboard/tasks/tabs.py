@@ -51,8 +51,18 @@ class HistoryListingTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
-            rally_data = self.process_dict_and_display('test')
-            return rally_data
+	    print('@@@!')
+            #rally_data = self.process_dict_and_display('test')
+            #return rally_data
+            #Fetching the reports of All Test Execution and returning it
+            all_report  = sidecar_conn.events.list_test_configs(project_id = 1)
+	    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+            print(all_report)
+	    print('rally_data 1')
+            self.event_data = all_report
+	    print('rally data 2')
+            return list(all_report)
+
         except Exception, e:
             return []
 
@@ -80,6 +90,7 @@ class HistoryListingTab(tabs.TableTab):
             info['id'] = rally_data['id']
             info['name'] = rally_data['name']
             info['value'] = rally_data['value']
+
             content.append(RallyConfig(info))
         return content
 

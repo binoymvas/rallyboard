@@ -82,13 +82,24 @@ class UpdateTestList(workflows.UpdateMembersStep):
 
 
 class UpdateConfigAction(workflows.Action):
-    image_ref = forms.CharField(label=_("Image Ref"), max_length=255)
-    flavor_ref = forms.CharField(label=_("Flavor Ref"), max_length=255)    
+    image_ref = forms.CharField(label=_("Image Name"), max_length=255)
+    flavor_ref = forms.CharField(label=_("Flavor Name"), max_length=255)    
 
     def handle(self, request, data):
         try:
-            default_setting.update_setting('compute', 'image_ref', data['image_ref'])
-            default_setting.update_setting('compute', 'flavor_ref', data['flavor_ref'])
+            #default_setting.update_setting('compute', 'image_ref', data['image_ref'])
+            #default_setting.update_setting('compute', 'flavor_ref', data['flavor_ref'])
+	    print('Entering the workflows file')
+	    config_list = {}
+	    config_list['image_ref']   = data['image_ref']
+	    config_list['flavor_ref']  = data['flavor_ref']
+            print('****************List printing***********************')
+	    print('Configggggg listtt')	    
+	    print(config_list)
+	    print('***********************************')
+
+
+	    sidecar_conn.events.edit_test_configs(config_list)
             sidecar_conn.events.update_test(id=data['test_id'], update_null='1')
             for tests_id in data['wanted_tests']:
                 try:

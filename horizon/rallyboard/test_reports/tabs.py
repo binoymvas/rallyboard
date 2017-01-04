@@ -126,12 +126,11 @@ class QATestReportTab(tabs.TableTab):
         # | @Return Type: Dictionary
         """
         try:
-            
-            #Fetching th reports of QA Test Execution and returning it
-            qa_report = sidecar_conn.events.project_test_list()
-            self.event_data = qa_report
-            events = []
-            return qa_report
+        
+            #Fetching the reports of Benchmark Test Execution and returning it
+            qa_test_history  = sidecar_conn.events.list_test_history(project_id = 3)
+            self.event_data = qa_test_history
+            return list(qa_test_history)    
         except Exception, e:
             exceptions.handle(self.request, "Unable to fetch the reports.")
             return []

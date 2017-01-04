@@ -99,8 +99,9 @@ class TestConfigTable(tables.DataTable):
     TABLE TO LIST THE LOGS
     """
     id = tables.Column('id', verbose_name=_('ID'), sortable=True)
-    name = tables.Column('name',  verbose_name=_("Name"), sortable=True)
-    value = tables.Column('value', verbose_name=_('Value'), sortable=True)
+    option_name = tables.Column('option_name',  verbose_name=_("Config Name"), sortable=True)
+    value = tables.Column('value', verbose_name=_('Config Value'), sortable=True)
+    project_id = tables.Column('project_id', verbose_name=_('Project ID'), sortable=True)
 
     class Meta:
         name = "logs"

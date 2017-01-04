@@ -142,9 +142,13 @@ class QATestReportTable(tables.DataTable):
     """
 
     #Columns which are to be displayed in the table
-    test_name     = tables.Column('name', verbose_name=_('Test Name'), sortable=True)
-    test_service  = tables.Column('name', verbose_name=_('Service'), sortable=True)
-    test_time     = tables.Column('name', verbose_name=_('Time'), sortable=True)
+    #test_name     = tables.Column('name', verbose_name=_('Test Name'), sortable=True)
+    #test_service  = tables.Column('name', verbose_name=_('Service'), sortable=True)
+    #test_time     = tables.Column('name', verbose_name=_('Time'), sortable=True)
+   
+    #Columns which are to be displayed in the table
+    test_regex = tables.Column(get_test_regex, verbose_name=_('Test Details'), sortable=False)
+    history_create_time = tables.Column('history_create_time', verbose_name=_('Time'), sortable=True)
 
     class Meta:
         name = "qatestreporttable"
