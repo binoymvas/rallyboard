@@ -603,20 +603,24 @@ class TestConfig(object):
     # |
     # | Default Value: None
     # |
-    option = None
+    option_name = None
 
     # | value :  value corresponding to the option
     # |
     # | Default Value: None
     # |
     value  = None
+    project_id  = None
+    test_status = None
 
     def __init__(self, test_config):
 
         """ Initialization Function """
         self.id             = test_config['id']
-        self.option         = test_config['option']
+        self.option_name    = test_config['option_name']
         self.value          = test_config['value']
+	self.project_id     = test_config['project_id']
+	self.test_status    = test_config['test_status']
 
 
 class TestConfigGenerator(object):
@@ -628,9 +632,15 @@ class TestConfigGenerator(object):
         # | Arguments: test_config_list
         # |
         # | Returns None        
+        print('############################Generator#######')
+        print(test_config_list)
         self._count = len(test_config_list['test_config'])
         self._config = test_config_list['test_config']
         self._position = 0
+        print("Entering here - generator section")
+	print('Length of Config list')
+	print(len(test_config_list['test_config']))
+	print('--------------------------------------------------')
 
     def __iter__(self):
         return self
@@ -925,7 +935,7 @@ class EventsHttp(object):
         data = {"event": {"name": 'name',"vm_uuid_list": 'vm_uuid_list',"node_uuid": 'node_uuid'}}
         data = self._obj.http.post(url,  data, headers)
 
-    def get_test_config(self, id=None, option=None, value=None):
+    def get_test_config(self, id=None, option_name=None, value=None, project_id=None, test_status=None):
         """
         # | Function to fetch the test config values
         # | Arguments:
@@ -933,12 +943,117 @@ class EventsHttp(object):
         # | Return:
         # |
         """
+        print('Entering get_test_config function')
         self._obj.authenticate()
         headers = {"X-Auth-Token":self._obj.authenticated_token}
         url     = self._obj.sidecar_url + '/evacuates/sidecarrally/testconfig?'
+	print(url)
         data    = self._obj.http.get(url, headers)
+	print(data['body'])
+	print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
         return TestConfigGenerator(data['body'])
 
+    def get_test_config_value(self, option_name = None):
+        """
+        # | Function to fetch the test config value
+        # | Arguments:
+        # | 
+        # | Return:
+        # |
+        """
+	print('@@@@@@@')
+        print('Entering get_test_config_value function')
+	print('Option Name is ')
+	print(option_name)
+        self._obj.authenticate()
+        headers = {"X-Auth-Token":self._obj.authenticated_token}
+        url     = self._obj.sidecar_url + '/evacuates/sidecarrally/testconfig?'
+
+        # | Creating filter options
+        if option_name:
+            url = url + "option_name=%s&" % (option_name)
+
+        print(url)
+        data    = self._obj.http.get(url, headers)
+
+	for item in data['body']['test_config']:
+	    option_value = item['value']
+
+	print(option_value)
+	print('-----------------___Return value----------------------------')
+        #return TestConfigGenerator(data['body']['test_config'])
+	return option_value
+
+    def list_test_configs(self, id=None, project_id = None, option_name = None, value = None, test_status = None):
+        """
+        # | Functon to list all test config values
+        # | <Arguments>
+        # |
+        # | <Return>
+        # | 
+        """
+	print('Entering the sidecarclient - list test configs function')
+        self._obj.authenticate()
+	print('Authentication finished')
+	headers  = {"X-Auth-Token":self._obj.authenticated_token}
+        url      = self._obj.sidecar_url + '/evacuates/sidecarrally/testconfig?'
+        print('Setting the url')
+        data     = self._obj.http.get(url, headers)
+	print(url)
+	print('+++++++++++++++++++++++++++++++++++++++++++++++++')
+	print(data)
+        return TestConfigGenerator(data['body'])
+
+    def edit_test_configs(self, test_config={}, id=None, project_id = None, option_name = None, value = None, test_status = None):
+        """
+        # | Function to edit the test config details in the DB 
+        # | <Arguments>:
+        # | 
+        # | <Return>:
+        # | 
+        """
+	print('edit_test_configs function=============================')
+	#print(option_name)
+	print(test_config)
+	print('*************************Option Name printed above***************************')
+	#print(value)
+	print('*************************Value printed above*********************************')
+	
+	print('Entering the function to edit the test config data')
+        self._obj.authenticate()
+	print('Authentication complete')
+	headers  = {"X-Auth-Token":self._obj.authenticated_token}
+	url      = self._obj.sidecar_url + '/evacuates/sidecarrally/testconfig?'
+        data = {}
+	data["test_config"] = {}
+        #data["test_config"] = test_config
+
+	data["test_config"]["conf_values"] = test_config
+
+        """
+        # | Creating test config details
+	if option_name:
+	    data["test_config"]["option_name"]  = option_name
+	    print('Updating the option_name')
+        if value:
+	    data["test_config"]["value"]  = value
+	    print('Updating the Value')
+        if project_id:
+            data["test_config"]["project_id"] = project_id
+	    print('Updating the project id')
+        if test_status:
+            data["test_config"]["test_status"] = test_status
+	    print('Updating the test status')
+        """
+	print('*************************************')
+	print(data)
+	print('*************************************')
+
+        data = self._obj.http.put(url, data, headers)
+	print('Data is')
+	print(data)
+	print('++++++++++++++++++++++++++++++++')
+	
     def evacuate_healthcheck_status(self):
         """
         # | Function to execute and fetch the healthcheck details for all events
