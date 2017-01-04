@@ -49,6 +49,7 @@ class TestConfigController(RestController):
         # | Return Type: Void
         # | 
         """
+	LOG.info('TestConfig Class')
         self.rally_tests = rally_sql.RallyModel()
 
     @expose(generic=True, template='json')
@@ -60,10 +61,11 @@ class TestConfigController(RestController):
         # | Return:
         """
         try:
+            print('Entering the Get function@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
             LOG.info('Get function')
             rbac.enforce('get_detail', pecan.request)
             result = self.rally_tests.get_test_config_value(option_name)
-            return { "test_history": result }
+            return { "test_config": result }
         except Exception as e:
             return exception_handle(e)
 
@@ -76,13 +78,39 @@ class TestConfigController(RestController):
         # |     <kw>: Url query parameters
         # |
         # | @Returns: Json response
-        """
+        #"""
         try:
-            LOG.info('get all function')
-            test_configs = self.rally_tests.get_all_test_configs(kw)
-            return {"test_history": test_configs}
+	    print('get all section')
+	    LOG.info('Entering the get all function')
+	    LOG.info(kw)
+	    LOG.info('----------------------------------------------')
+            LOG.info('get all function - TestConfig class')
+            test_configs = self.rally_tests.list_test_configs(kw)
+            return {"test_config": test_configs}
         except Exception as err:
             return exception_handle(err)
+
+    @expose(generic=True, template='json', content_type="application/json")
+    def put(self, **kw):
+        """
+        # | Function to handel the edit part of test config
+        # |
+        # | Arguments:
+        # | <config_id>: The config id which will be edited
+        # | 
+        # | Returns: Dictionary
+        """
+        try:
+            LOG.info('PUT SECTION INSIDE TEST CONFIG SECTION............')
+            rbac.enforce('edit_event', pecan.request)
+            LOG.info('++++++++++++++++++++++++++++++')
+            LOG.info(kw)
+            LOG.info('++++++++++++++++++++++++++++++')
+            self.rally_tests.edit_test_config(kw)
+            pecan.response.status = 204
+        except Exception as e:
+            print e.message
+            return exception_handle(e)
 
 class TestHistoryController(RestController):
     """
@@ -184,7 +212,7 @@ class TestHistoryController(RestController):
             return exception_handle(e)
 
 class TestLogController(RestController):
-    LOG.error("In  the getting all the project tests. TestListController")
+    LOG.error("In  the getting all the project tests. TestLogController")
     
     def __init__(self, data=None):
         """
@@ -347,6 +375,7 @@ class RallyTestController(RestController):
     testlist = TestListController()
     testlog  = TestLogController()
     testhistory = TestHistoryController()
+    testconfig  = TestConfigController()
 
     def __init__(self, data=None):
         """
@@ -398,9 +427,10 @@ class RallyTestController(RestController):
                     LOG.info('Result is ')
 		    LOG.info(result)
                     test_output = self.executeBenchmarkTests(result, project_id)
-                else:
-                    LOG.info('nooooooooooooooooooooooo')
-		    LOG.info(project_id)
+                elif str(project_id) == '3':
+		   LOG.info('QA Test section')
+                   self.update_testlog(project_id, '', 0)
+                   test_output = self.executeQATests(result) 
             LOG.info('Executon of the test is completed. Updated the test uuid.')
         except Exception as e:
             LOG.error(e)
@@ -422,6 +452,7 @@ class RallyTestController(RestController):
         except Exception as err:
             LOG.error("Error in getting all the project tests.")
             return exception_handle(err)
+
 
     def executeAllTests(self, test_list):
         """
@@ -662,6 +693,65 @@ class RallyTestController(RestController):
         output, err = p.communicate()
  	LOG.info('Benchmarking test Report Has been Generated successfully')
 	return output
+
+    #****************************QA Test Section*************************#
+    def executeQATests(self, test_list):
+        """
+        # | Function to execute QA tests
+        # | 
+        # | @Arguments:
+        # |   
+        # | @Return
+        """
+        #execute QA tests
+        LOG.info("Creating the file to save the list of tests")
+        file_path = "/tmp/qa_test_list.txt"
+        fp = open(file_path,"w")
+        os.chmod(file_path, 0777)
+
+        #Adding the test to the file
+        for row in test_list:
+            test_id    = row['id']
+            regex      = row['test_regex']
+            project_id = row['project_id']
+            fp.write(regex + '\n')
+            LOG.info("Adding test %s to the list", row['test_regex'])
+        fp.close
+        fp.flush()
+
+        #Entering to the loop and making the file execution
+        if os.path.isfile(file_path):
+            LOG.info('Entering the loop for QA Tests section')
+
+            #Making the command for the test execution
+            cmd = 'rally verify start --system-wide --tests-file ' + file_path
+            LOG.info(cmd)
+            res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
+            output, err = res.communicate()
+            LOG.info(output)
+
+            LOG.info('Going to extract the UUID corresponding to the test id ' + test_id)
+            uuid = self.extractVerificationUUID(output)
+
+            LOG.info('Test UUID is ')
+            LOG.info(uuid)
+
+            LOG.info('Executing the function for generating the report')
+            test_report = self.generateTestReport(test_id, uuid)
+
+            LOG.info('Updating the test log with the log and the result.')
+            self.update_testlog(project_id, output, 0, test_report)
+
+            #Making the dictionary for the history creation
+            history = {}
+            history['testlist_id'] = test_id
+            history['project_id'] = project_id
+            history['results'] = test_report
+            self.rally_tests.create_test_history(history)
+            LOG.info("Created the history for test report")
+        return True
+
+    #***********************************************************************#
 
 def exception_handle(e):
     """
