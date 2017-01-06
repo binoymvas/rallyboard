@@ -1,7 +1,7 @@
-#_______________________________________________________________________
-# | File Name: dashboard.py                                             |
+# _______________________________________________________________________
+# | File Name: panel.py                                                 |
 # |                                                                     |
-# | This file is for handling the views of support ticket display       |
+# | This file is for handling the clean up of the projects created by rally|
 # |_____________________________________________________________________|
 # | Start Date: Nov 16th, 2016                                          |
 # |                                                                     |
@@ -10,16 +10,14 @@
 # | Copy Right: 2016@nephoscale                                         |
 # |_____________________________________________________________________|
 
-#Importing the required packages
+#Importing the packages
 from django.utils.translation import ugettext_lazy as _
+from openstack_dashboard.dashboards.rallyboard import dashboard
 import horizon
-class RallyDashboard(horizon.Dashboard):
-    """ 
-    Class to register the Customer dashboard to horizon
-    """
-    name   = _("Rally Tests")
-    slug   = "rally_dashboard"
-    panels = ('tasks', 'test_reports', 'clean_project',) 
-    default_panel = 'tasks'
-    permissions = ('openstack.roles.admin',)
-horizon.register(RallyDashboard)
+
+class CleanProject(horizon.Panel):
+    name = _("Clean Project")
+    slug = "clean_project"
+    
+#Registering the class
+dashboard.RallyDashboard.register(CleanProject)

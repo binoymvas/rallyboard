@@ -1,0 +1,11 @@
+{% extends 'rally_dashboard/clean_project/tasksbase.html' %}
+{% load i18n %}
+{% block title %}{% trans "Cleaned Resources" %}{% endblock %}
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=page_title %}
+{% endblock page_header %}
+{% block main %}
+    <div class="row">
+        <div class="col-sm-12">{{resource_list|safe}}</div>
+    </div>
+{% endblock %}

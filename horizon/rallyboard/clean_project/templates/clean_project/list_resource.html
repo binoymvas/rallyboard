@@ -1,0 +1,17 @@
+{% extends 'rally_dashboard/clean_project/tasksbase.html' %}
+{% load i18n %}
+{% block title %}{% trans "Clean Following Resources" %}{% endblock %}
+{% block page_header %}
+  {% include "horizon/common/_page_header.html" with title=page_title %}
+{% endblock page_header %}
+{% block main %}
+    <form action="cleanproject" method="post">
+	<input type="hidden" name="csrfmiddlewaretoken" value="{{csrf_token}}">
+   	<div class="row">
+            <div class="col-sm-10">{{resources|safe}}</div>
+	    <div class="col-sm-1">
+    		<input type="submit" name="confirm_purge" id="confirm_purge" value="Confirm" class="btn btn-danger"/>
+	    </div>
+	</div>
+    </form>
+{% endblock %}
