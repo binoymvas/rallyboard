@@ -18,5 +18,5 @@ from openstack_dashboard.dashboards.rallyboard.test_reports import views
 urlpatterns = patterns(
     '',
     url(r'^$', views.IndexView.as_view(), name='index'),
-    url(r'^(?P<history_id>[^/]+)/cleanproject/$', views.clean_all_project, name="cleanproject"),
+    url(r'^/cleanproject/$', views.cleanproject, name="cleanproject"),
 )

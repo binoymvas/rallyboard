@@ -32,7 +32,7 @@ class IndexView(tabs.TabbedTableView):
     template_name   = "rally_dashboard/clean_up/index.html"
     page_title      = "Rally Tests History"
 
-def clean_all_project(request, **kwargs):
+def cleanproject(request, **kwargs):
     """
     # | Method to show the report 
     # |
