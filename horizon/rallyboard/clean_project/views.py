@@ -1,7 +1,7 @@
 # _______________________________________________________________________
 # | File Name: views.py                                                 |
 # |                                                                     |
-# | This file is for handling the views of support ticket display       |
+# | This file is for handling the views of clean up the projects        |
 # |_____________________________________________________________________|
 # | Start Date: Aug 31th, 2016                                          |
 # |                                                                     |
@@ -21,6 +21,7 @@ import shlex
 import os
 from django.conf import settings
 from django.contrib import messages
+import time
 
 #Making the credential for the command
 username = getattr(settings, "SC_USERNAME")
@@ -69,20 +70,18 @@ def clean_project(request, **kwargs):
     res = subprocess.Popen(command, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
     output, err = res.communicate()
     
-    #If there is no error then showing the success message	
+    #If there is no error then showing the success message
     if err == None:
         messages.add_message(request, messages.SUCCESS, 'Project cleaning is successfully completed.')
     else:
-	messages.add_message(request, messages.ERROR, 'Project cleaning is failed.')
+	messages.add_message(request, messages.ERROR, 'Project cleaning is failed.' + str(err))
 
-    #Showing the cleaned resources 
+    #Showing the cleaned resources
+    time.sleep(3)
     command = 'ospurge --dry-run --cleanup-project rallyTestProject ' + cmd
     res = subprocess.Popen(command, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
     output, err = res.communicate()
     cleaned_output = " <br>".join(output.split("\n"))
-    print('cleaned_output')
-    print(cleaned_output)
-    print('cleaned_outputnnn')
 
     #Displaying the report
     context = {
