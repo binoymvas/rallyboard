@@ -379,7 +379,7 @@ class RallyModel():
         LOG.info("A new config option has been added to the DB")
         return True
 
-    def get_test_config_value(self, option_name):
+    def get_test_config_value(self, option_name, project_id):
         """
         # | Function to fetch the config value corresponding to an option
         # | <Arguments>:
@@ -389,15 +389,15 @@ class RallyModel():
         """
         LOG.info('Entering the function - get_test_config_value')
         LOG.info('Fetching the option value from the DB')
-        get_test_config_value = select([self.test_config]).where(self.test_config.c.option_name == option_name)
+	get_test_config_value = select([self.test_config]).where(and_(self.test_config.c.option_name == option_name, self.test_config.c.project_id == project_id))
+
+	LOG.info('Select query is ')
+	LOG.info(get_test_config_value)
         result = self.conn.execute(get_test_config_value)
         for row in result:
-            LOG.info('Entering the for loop to fetch the config value')
             config_value = row['value']
         LOG.info('The value corresponding to this option name is ')
-        LOG.info(config_value)
         return config_value
-
 
     def get_all_test_configs(self):
         """
@@ -434,9 +434,7 @@ class RallyModel():
        # |     
        """
        LOG.info('entering the function - list_test_configs')
-       #get_config_list = select([self.test_config]).where(self.test_config.c.project_id == 2)
        get_config_list = select([self.test_config])
-       LOG.info('Fetch the details from test_config table')
 
        #Adding search criteria
        if "option_name" in args:
@@ -463,64 +461,49 @@ class RallyModel():
 	    config_data['test_status']      = row['test_status']
             config_list.append(config_data)
 
+       LOG.info('Returning the data -config list')
        LOG.info(config_list)
-       LOG.info('++++++++++++++++++++++++++++++++++++++++++++')
        return config_list
 
     def edit_test_config(self, args):
         """"
-	# |  
-        # |  
-        # |  
-        # |  
+	# | Function to edit the test config data from the edit form
+        # | <Arguments>:
+        # |    args - values to be used for DB updation
+        # | <Return>:
+        # |    Save the updated data in DB
         """
-	LOG.info('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
         data = {}
-	LOG.info(args)
-	print(args)
-	LOG.info('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
         data1 = {}
 	data={}
 
 	LOG.info(args['test_config']['conf_values'])
-	LOG.info('--------------------------')
         LOG.info(args['test_config']['conf_values'].iterkeys())	
 	LOG.info('Checking if flavor_ref is present')
         if 'flavor_ref' in args['test_config']['conf_values'].iterkeys():
-    	    data['flavor_value']  = args['test_config']['conf_values']['flavor_ref']
-            LOG.info(data['flavor_value'])
+    	    data['value']  = args['test_config']['conf_values']['flavor_ref']
+            LOG.info(data['value'])
 	    LOG.info('*************')
 	    option = 'flavor_name'
 
 	    test_list = []
 	    data1['flavor_name'] = 'testflavor'
-	    update = self.test_config.update().where(self.test_config.c.option_name==option).values(value=data['flavor_value'])
+	    LOG.info('Going to do the update query for flavor')
+	    update = self.test_config.update().where(and_(self.test_config.c.option_name == option, self.test_config.c.project_id == args['project_id'])).values(data)
 	    LOG.info(update)
 	    self.conn.execute(update)
 	    LOG.info('updating the flavor value in db')
 
 	LOG.info('Checking if image_ref is present')
 	if 'image_ref' in args['test_config']['conf_values'].iterkeys():
-	    data['image_value']  = args['test_config']['conf_values']['image_ref']
-	    LOG.info(data['image_value'])
-	    update = self.test_config.update().where(self.test_config.c.option_name == 'image_name').values(value=data['image_value'])
+	    data['value']  = args['test_config']['conf_values']['image_ref']
+	    LOG.info(data['value'])
+	    LOG.info('Going to do the update query for image')
+	    update = self.test_config.update().where(and_(self.test_config.c.option_name == 'image_name', self.test_config.c.project_id == args['project_id'])).values(data)
 	    LOG.info(update)
 	    self.conn.execute(update)
 	    LOG.info('Updating image value in DB')
 
-	LOG.info('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-	#LOG.info(data)
-	LOG.info('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-
-        #Updating the data
-        #update = self.test_config.update().where(self.test_config.c.id == test_id).values(data)
-        #self.conn.execute(update)
-
-
-
-
-	
-      
     """***************************** Test Config Ends Here ******************************"""
 
     """***************************** history ********************************************"""

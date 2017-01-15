@@ -53,7 +53,7 @@ class TestConfigController(RestController):
         self.rally_tests = rally_sql.RallyModel()
 
     @expose(generic=True, template='json')
-    def get(self, option_name):
+    def get(self, option_name, project_id):
         """
         # | Method to get the Test Config details
         # | Argument:
@@ -61,10 +61,9 @@ class TestConfigController(RestController):
         # | Return:
         """
         try:
-            print('Entering the Get function@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
             LOG.info('Get function')
             rbac.enforce('get_detail', pecan.request)
-            result = self.rally_tests.get_test_config_value(option_name)
+            result = self.rally_tests.get_test_config_value(option_name, project_id)
             return { "test_config": result }
         except Exception as e:
             return exception_handle(e)
@@ -80,11 +79,8 @@ class TestConfigController(RestController):
         # | @Returns: Json response
         #"""
         try:
-	    print('get all section')
-	    LOG.info('Entering the get all function')
+	    LOG.info('Entering the get all function - Test Config Class')
 	    LOG.info(kw)
-	    LOG.info('----------------------------------------------')
-            LOG.info('get all function - TestConfig class')
             test_configs = self.rally_tests.list_test_configs(kw)
             return {"test_config": test_configs}
         except Exception as err:
@@ -101,9 +97,9 @@ class TestConfigController(RestController):
         # | Returns: Dictionary
         """
         try:
+	    LOG.info('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
             LOG.info('PUT SECTION INSIDE TEST CONFIG SECTION............')
             rbac.enforce('edit_event', pecan.request)
-            LOG.info('++++++++++++++++++++++++++++++')
             LOG.info(kw)
             LOG.info('++++++++++++++++++++++++++++++')
             self.rally_tests.edit_test_config(kw)
@@ -483,7 +479,7 @@ class RallyTestController(RestController):
             LOG.info('Entering the loop for All Tests section')
 
             #Making the command for the test execution
-            cmd = 'rally verify start --system-wide --tests-file ' + file_path
+            cmd = 'rally verify start --load-list ' + file_path
             LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()
@@ -632,9 +628,11 @@ class RallyTestController(RestController):
         """
         #extract the Verification UUID from the output
         replaced_output = output.replace('\n', ' ')
-        LOG.info('+++++++++Replaced Output+++++++++')
-        #LOG.info(replaced_output)
-        match = re.findall('Verification UUID: (.*?) ', replaced_output)
+        LOG.info('+++++++++Replaced Output+++++++++ in the extractVerificationUUID')
+        LOG.info(replaced_output)
+	match = re.findall( 'UUID=(.*?)\)', replaced_output)
+        #match = re.findall('Verification UUID: (.*?) ', replaced_output)
+	LOG.info(match)
         LOG.info(match[0])
         return match[0]
 
@@ -666,7 +664,7 @@ class RallyTestController(RestController):
         # |
         """
         LOG.info('Going to generate the test report')
-        report_cmd = 'rally verify results --uuid '+ test_uuid +' --html'
+        report_cmd = 'rally verify report --uuid '+ test_uuid +' --html'
         LOG.info('Report command is '+ report_cmd)
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
@@ -724,7 +722,7 @@ class RallyTestController(RestController):
             LOG.info('Entering the loop for QA Tests section')
 
             #Making the command for the test execution
-            cmd = 'rally verify start --system-wide --tests-file ' + file_path
+            cmd = 'rally verify start  --load-list ' + file_path
             LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()

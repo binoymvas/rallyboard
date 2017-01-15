@@ -86,6 +86,10 @@ class UpdateConfigAction(workflows.Action):
     flavor_ref = forms.CharField(label=_("Flavor Name"), max_length=255)    
 
     def handle(self, request, data):
+
+        #Fetching the project id
+        project_id = data['test_id']
+
         try:
             #default_setting.update_setting('compute', 'image_ref', data['image_ref'])
             #default_setting.update_setting('compute', 'flavor_ref', data['flavor_ref'])
@@ -93,13 +97,8 @@ class UpdateConfigAction(workflows.Action):
 	    config_list = {}
 	    config_list['image_ref']   = data['image_ref']
 	    config_list['flavor_ref']  = data['flavor_ref']
-            print('****************List printing***********************')
-	    print('Configggggg listtt')	    
-	    print(config_list)
-	    print('***********************************')
 
-
-	    sidecar_conn.events.edit_test_configs(config_list)
+	    sidecar_conn.events.edit_test_configs(config_list, project_id)
             sidecar_conn.events.update_test(id=data['test_id'], update_null='1')
             for tests_id in data['wanted_tests']:
                 try:
@@ -127,14 +126,17 @@ class UpdateTest(workflows.Workflow):
     slug = "update_instance"
     name = _("Edit Test list")
     finalize_button_name = _("Save")
-    success_message = _('Modified Test list "%s".')
-    failure_message = _('Unable to modify test list "%s".')
+    #success_message = _('Modified Test list "%s".')
+    #failure_message = _('Unable to modify test list "%s".')
+    success_message = _('Test details modification was successful!')
+    failure_message = _('Unable to modify the test details. Please check the logs!')
     success_url = "horizon:rally_dashboard:tasks:index"
     default_steps = (UpdateConfig,
                      UpdateTestList)
 
     def format_status_message(self, message):
-        return message % self.context.get('image_ref', 'unknown test')
+        #return message % self.context.get('image_ref', 'unknown test')
+        return message
 
 class AdminUpdateInstance(UpdateTest):
     success_url = "horizon:rally_dashboard:tasks:index"
