@@ -57,7 +57,7 @@ $( document ).ready(function() {
             <tr class="tablesorter-headerRow">
                 <th class="sortable normal_column tablesorter-header" data-column="2" tabindex="0"><div class="tablesorter-header-inner">Name</div></th>
                 <th class="sortable normal_column tablesorter-header" data-column="3" tabindex="0"><div class="tablesorter-header-inner">Test cases</div></th>
-                <th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>
+                <!--<th class="sortable normal_column tablesorter-header" data-type="size" data-column="4" tabindex="0"><div class="tablesorter-header-inner">UUID</div></th>-->
             </tr>
             </thead>
             <tbody>
@@ -65,7 +65,6 @@ $( document ).ready(function() {
                     <tr class="{% cycle 'odd' 'even' %}" id="test_listing{{test.id}}" class="test_listing">
                         <td class="sortable normal_column">{{test.name}}</td>
                         <td class="sortable normal_column">{{test.test_regex}}</td>
-                        <td class="sortable normal_column">{{test.test_uuid}}</td>
                     </tr>
                 {% endfor %}
             </tbody>
