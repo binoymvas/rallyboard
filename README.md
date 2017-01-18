@@ -7,6 +7,17 @@
     - [Clean Project Panel](#clean-project-panel)
 - [Pre-Requisites](#pre-requisites)
 - [Installation and Configuration Steps:](#install-configure-steps)
+    - [Sidecar Related Steps](#sidecar-related-steps)
+    - [Tenant and User Creation](#tenant-user-creation)
+    - [Rally Installation](#rally-installation)
+    - [Rally Deployment Creation](#rally-deployment-creation)
+    - [Add Tempest as a verifier to Rally](#add-tempest-verifier-rally)
+    - [Create new tables](#create-tables)
+    - [Insert data into these tables](#insert-data-tables)
+    - [Script execution to add tests to the DB](#script-insert-test-to-DB)
+    - [Configuring the Benchmark Test Files](#configure-benchmark-test-files)
+    - [Configuring the Rally Dashboard](#configure-rally-dashboard)
+    - [Ospurge installation](#ospurge-installtion)
 - [Important Notes](#important-notes)
 
 ## Description
@@ -94,7 +105,7 @@ Ref: https://github.com/nephoscale/sidecar.git
 4) The environment variables must be correctly setup.
 
 _Example_
-############
+<pre>
 export OS_USERNAME="admin"
 export OS_PASSWORD="openstack"
 export OS_TENANT_NAME="admin"
@@ -102,7 +113,39 @@ export OS_ENDPOINT="http://198.100.181.74:9090/v2"
 export OS_ENDPOINT_TYPE='publicURL'
 export OS_REGION_NAME='RegionOne'
 export OS_AUTH_URL="http://198.100.181.74:35357/v2.0"
-############
+</pre>
+
+## Installation and Configuration Steps
+
+### Sidecar Related Steps
+
+### Tenant and User Creation
+
+### Rally Installation
+
+### Rally Deployment Creation
+
+### Add Tempest as a verifier to Rally
+
+### Create new tables
+
+### Insert data into these tables
+
+### Script execution to add tests to the DB
+
+### Configuring the Benchmark Test Files
+
+### Configuring the Rally Dashboard
+
+### Ospurge installation
+
+## Important Notes
+
+1) One thing which we have noted is that the Rally commands have changes multiple times in their recent versions. We had made the required modifications and had tested till Rally version '0.7.1~dev269'.
+ ( the version available as on Jan 18, 2017).
+_Please cross check the version. Sometimes commands might again change in the latest version. If so, the corresponding changes need to be made in the 'controller(rally_tests.py)' file._
+
+2) Second one is related to OSpurge. Current version of ospurge (available as on Jan 18, 2017) works only with a limited number of openstack installations. It's not working in latest Openstack version as it's pointing to incorrect/deprecated module paths. Need to cross check this.
 
 
 
