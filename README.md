@@ -44,18 +44,18 @@ All the available Testing options will be listed in this panel. Following action
 
   - **Run Tests:-**
        - Clicking this button, will display all the active tests that would be executed. Tests can be executed from that page.
-  - **Edit Test Details: **
+  - **Edit Test Details:**
        - Opens up the form to edit the test config details and add/remove tests
 
          (Screenshot)
 
          The form will have 2 sections:
 
-            *i) Configuration Information*
+            i) Configuration Information*
                 - Config details like image name and flavor name can be set from this section.
 
                 (Screenshot)
-            *ii) Assign Tests*
+            ii) Assign Tests
                 - Users can select the tests which they want to execute from this section.
                 (Screenshot)
 
