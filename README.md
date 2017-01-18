@@ -28,7 +28,7 @@
 This repository contains the files related to the integration of Rally test suite with Horizon Dashboard.
 On successful installation, a "Rally Dashboard" plugin will be displayed in the left side of the Horizon dashboard.
 
-http://i.imgur.com/4p8fcy2.png
+![Horizon Dashboard](http://i.imgur.com/4p8fcy2.png)
 
 Rally Dashboard will have the following 3 Panels:
 
@@ -36,7 +36,9 @@ Rally Dashboard will have the following 3 Panels:
 * Test History - Contains a history of all tests that have been executed till now. Test Reports have been categorized and will be available under their respective tabs itself (All Test Reports, Benchmark Test Reports and QA Test Reports).
 * Clean Project - This corresponds to the Ospurge test suite integration. On opening this panel, a dry run will be executed to list all the resources that are present under the project. On user confirmation, these resources will be deleted.
 
-http://i.imgur.com/oVuAdoL.png
+
+![Horizon Dashboard](http://i.imgur.com/oVuAdoL.png)
+
 
 ### Tasks Panel
 
