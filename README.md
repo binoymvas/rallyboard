@@ -42,9 +42,9 @@ On successful installation, a "Rally Dashboard" plugin will be displayed in the 
 **1) Rally Tests**
 All the available Testing options will be listed in this panel. Following actions are also available:
 
-  - **a) Run Tests: **
+  - **Run Tests:-**
        - Clicking this button, will display all the active tests that would be executed. Tests can be executed from that page.
-  - **b) Edit Test Details: **
+  - **Edit Test Details: **
        - Opens up the form to edit the test config details and add/remove tests
 
          (Screenshot)
@@ -59,7 +59,7 @@ All the available Testing options will be listed in this panel. Following action
                 - Users can select the tests which they want to execute from this section.
                 (Screenshot)
 
-  - **c) View Report - Displays the latest test report**
+  - **View Report - Displays the latest test report**
 
     (Screenshot)
         
