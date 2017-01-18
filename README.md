@@ -28,7 +28,7 @@
 This repository contains the files related to the integration of Rally test suite with Horizon Dashboard.
 On successful installation, a "Rally Dashboard" plugin will be displayed in the left side of the Horizon dashboard.
 
-** Rally Dashboard will have the following 3 Panels:
+**Rally Dashboard will have the following 3 Panels:**
 
 * Tasks - Listing of all Testing options - All Tests, Benchmark Tests and QA Tests
 * Test History - Contains a history of all tests that have been executed till now. Test Reports have been categorized and will be available under their respective tabs itself (All Test Reports, Benchmark Test Reports and QA Test Reports).
@@ -103,6 +103,7 @@ Ref: https://github.com/nephoscale/sidecar.git
 4) The environment variables must be correctly setup.
 
 _Example_
+
 <pre>
 export OS_USERNAME="admin"
 export OS_PASSWORD="openstack"
@@ -151,7 +152,7 @@ cd rally/
 ./install_rally.sh --system --dbtype mysql --db-user db-username --db-password db-password --db-host db-host> --db-name db-name
 </pre>
 
-*Ex - ./install_rally.sh --system --dbtype mysql --db-user root --db-password openstack --db-host 198.100.181.74 --db-name sidecar*
+**Ex - ./install_rally.sh --system --dbtype mysql --db-user root --db-password openstack --db-host 198.100.181.74 --db-name sidecar**
 
 ### Rally Deployment Creation
 
@@ -190,7 +191,7 @@ Ref: http://rally.readthedocs.io/en/latest/quick_start/tutorial/step_3_benchmark
 rally deployment create --filename existing_users.json  --name name of the deployment
 </pre>
 
-*Ex- rally deployment create --filename existing_users.json  --name sampleDeployment*
+**Ex- rally deployment create --filename existing_users.json  --name sampleDeployment***
 
 ### Add Tempest as a verifier to Rally
 
@@ -216,7 +217,7 @@ rally verify list-verifiers
 
 1) Create new tables into the sidecar database. These are our custom tables used for storing rally task history, reports, log, config data, etc.
 
-**Table Name - project_tests_list
+**Table Name - project_tests_list**
 
 <pre>
 CREATE TABLE `project_tests_list` (
@@ -231,7 +232,7 @@ CREATE TABLE `project_tests_list` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 </pre>
 
-**Table Name - test_config
+**Table Name - test_config**
 
 <pre>
 
@@ -245,7 +246,7 @@ CREATE TABLE `test_config` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 </pre>
 
-**Table Name - tests_list
+**Table Name - tests_list**
 
 <pre>
 CREATE TABLE `tests_list` (
@@ -263,7 +264,7 @@ CREATE TABLE `tests_list` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1
 </pre>
 
-**Table Name - tests_log
+**Table Name - tests_log**
 <pre>
 CREATE TABLE `tests_log` (
   `id` varchar(100) NOT NULL,
