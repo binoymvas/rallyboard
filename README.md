@@ -74,6 +74,7 @@ All the available Testing options will be listed in this panel. Following action
 
 This is just a listing of config values from all the available projects.
 
+![Config Listing](http://i.imgur.com/FPoGR70.png "Config Listing")
 
 ### Tests History
 
