@@ -72,17 +72,17 @@ This is just a listing of config values from all the available projects.
 ### Tests History
 
 All available Test Reports from the past will be displayed in this panel. Test Reports will be displayed under their corresponding tabs.
- - a) All Test Reports
- - b) Benchmark Test Reports
- - c) QA Test Reports
+ - All Test Reports
+ - Benchmark Test Reports
+ - QA Test Reports
 
 (Screenshot)
 
 Following actions are available here:
 
- -a) View Report
+ - View Report
     - To view the test report via frontend
- - b) Delete Report
+ - Delete Report
     - To delete any report
 
 ### Clean Project:
