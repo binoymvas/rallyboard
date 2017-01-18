@@ -39,29 +39,32 @@ On successful installation, a "Rally Dashboard" plugin will be displayed in the 
 
 2 tabs are present inside this panel. They are - Rally Tests and Test Configuration.
 
-1) Rally Tests
+**1) Rally Tests**
 All the available Testing options will be listed in this panel. Following actions are also available:
 
-a) Run Tests - Clicking this button, will display all the active tests that would be executed. Tests can be executed from that page.
-b) Edit Test Details - Opens up the form to edit the test config details and add/remove tests
+  - **a) Run Tests: **
+       - Clicking this button, will display all the active tests that would be executed. Tests can be executed from that page.
+  - **b) Edit Test Details: **
+       - Opens up the form to edit the test config details and add/remove tests
 
-(Screenshot)
+         (Screenshot)
 
-The form will have 2 sections:
+         The form will have 2 sections:
 
-i) Configuration Information
-- Config details like image name and flavor name can be set from this section.
+            *i) Configuration Information*
+                - Config details like image name and flavor name can be set from this section.
 
-(Screenshot)
-ii) Assign Tests
-- Users can select the tests which they want to execute from this section.
-(Screenshot)
+                (Screenshot)
+            *ii) Assign Tests*
+                - Users can select the tests which they want to execute from this section.
+                (Screenshot)
 
-c) View Report - Displays the latest test report
+  - **c) View Report - Displays the latest test report**
 
-(Screenshot)
+    (Screenshot)
+        
 
-2) Test Configuration
+**2) Test Configuration**
 
 This is just a listing of config values from all the available projects.
 (Screenshot)
@@ -69,18 +72,18 @@ This is just a listing of config values from all the available projects.
 ### Tests History
 
 All available Test Reports from the past will be displayed in this panel. Test Reports will be displayed under their corresponding tabs.
-a) All Test Reports
-b) Benchmark Test Reports
-c) QA Test Reports
+ - a) All Test Reports
+ - b) Benchmark Test Reports
+ - c) QA Test Reports
 
 (Screenshot)
 
 Following actions are available here:
 
-a) View Report
-- To view the test report via frontend
-b) Delete Report
-- To delete any report
+ -a) View Report
+    - To view the test report via frontend
+ - b) Delete Report
+    - To delete any report
 
 ### Clean Project:
 
