@@ -26,7 +26,7 @@ class UpdateRow(tables.Row):
 
 class Runtest(tables.LinkAction):
     name = "runtests"
-    verbose_name = _("Run test ")
+    verbose_name = _("View Approved Tests ")
     url = "horizon:rally_dashboard:tasks:update"
     icon = "pencil"
     policy_rules = (("identity", "identity:list_users"),
@@ -55,7 +55,7 @@ class TestReport(tables.LinkAction):
 
 class Edittestlist(tables.LinkAction):
     name = "edittestslist"
-    verbose_name = _("Edit Test List")
+    verbose_name = _("Edit Test Details")
     url = "horizon:rally_dashboard:tasks:update"
     classes = ("ajax-modal",)
     icon = "pencil"

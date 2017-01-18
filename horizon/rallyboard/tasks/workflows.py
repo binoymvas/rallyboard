@@ -124,7 +124,7 @@ class UpdateConfig(workflows.Step):
 
 class UpdateTest(workflows.Workflow):
     slug = "update_instance"
-    name = _("Edit Test list")
+    name = _("Edit Test Details")
     finalize_button_name = _("Save")
     #success_message = _('Modified Test list "%s".')
     #failure_message = _('Unable to modify test list "%s".')
