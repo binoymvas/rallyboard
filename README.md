@@ -1,7 +1,7 @@
 ## Table of content
 
 - [Description](#description)
-    - [Rally-Horizon Integration Plugin] (#rally-horizon-plugin)
+    - [Rally-Horizon Integration Plugin](#rally-horizon-integration-plugin)
     - [Tasks Panel](#tasks-panel)
     - [Tests History Panel](#test-history-panel)
     - [Clean Project Panel](#clean-project-panel)
@@ -80,3 +80,29 @@ OSpurge is used for cleaning up all the resources left over after testing.
 On opening the panel, it will display the results of a 'dry-run'. .ie- a plain listing of all resources that would get deleted on executing the cleanup. These resources will get cleaned up only if user clicks on the 'Confirm' button available in the page.
 
 (Screenshot)
+
+## Pre-Requisites
+
+1) Sidecar client module must be already installed.
+Ref: https://github.com/nephoscale/python-sidecarclient.git
+
+2) Sidecar api must be already installed.
+Ref: https://github.com/nephoscale/sidecar.git
+
+3) Sidecar service and it's endpoints must be created and configured correctly.
+
+4) The environment variables must be correctly setup.
+
+_Example_
+############
+export OS_USERNAME="admin"
+export OS_PASSWORD="openstack"
+export OS_TENANT_NAME="admin"
+export OS_ENDPOINT="http://198.100.181.74:9090/v2"
+export OS_ENDPOINT_TYPE='publicURL'
+export OS_REGION_NAME='RegionOne'
+export OS_AUTH_URL="http://198.100.181.74:35357/v2.0"
+############
+
+
+
