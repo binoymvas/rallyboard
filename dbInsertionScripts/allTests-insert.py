@@ -36,28 +36,33 @@ def executeCommands(command, shellFlag = True, debug = False):
     p = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     for line in p.stdout.readlines():
         #x.add_row([line])
-        test_case = line.split("[")  
-        create_data = {'name' : test_case[0]}        
-        print('===========================', test_case[0])
-        chk = test_case[0].split(".")
+        #test_case = line.split("[") 
+	test_case = line 
+	print(test_case)
+        create_data = {'name' : test_case}        
+        chk = test_case.split(".")
+
         if len(chk) > 2:
-            print chk
-            print chk[2]
-            print(chk[-1])
-        #x.add_row('test_case')   
+            #x.add_row('test_case') 
             create_data = {
-                        'name' : chk[2], 
+                        'name' : chk[-2], 
                         'project_id': 1,
-                        'test_service':chk[2],
-                        'test_scenario':chk[-1],
-                        'test_regex': test_case[0]
-                     }   
+                        'test_service':chk[0],
+                        'test_scenario':chk[-2],
+                        'test_regex':  test_case
+                     }  
+           
+	    #print(test_case[0])
+	    #print(create_data) 
             tt = Testcases()
             tt.createEvent(create_data)
+	    
     #print x
 
 #executeCommand('rally verify start --system-wide --regex tempest.api.baremetal.admin.test_api_discovery.TestApiDiscovery.test_api_versions')
-executeCommands('rally verify discover  --system-wide')
+
+#executeCommands('rally verify discover  --system-wide')
+executeCommands('rally verify list-verifier-tests')
 #test_lists = chk.list_events()
 
 """

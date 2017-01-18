@@ -21,7 +21,7 @@ LOG = log.getLogger(__name__)
 
 # READ THE CONNECTION VARIABLE
 try:
-    sql_connection = 'mysql+pymysql://root:stack123@198.100.181.75/sidecar'    
+    sql_connection = 'mysql+pymysql://root:openstack@198.100.181.74/sidecar'    
     LOG.info("Getting the db configuration and ding the connection.)")
 except Exception as e:
     LOG.error(str(e))
@@ -71,7 +71,7 @@ class Testcases():
         arg = {
             "id": unique_id,
             "name": kw['name'],
-            "project_id": 2,
+            "project_id": kw['project_id'],
             'test_service': kw['test_service'],
             'test_scenario': kw['test_scenario'],
             'test_regex': kw['test_regex'],

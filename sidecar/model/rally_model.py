@@ -516,7 +516,7 @@ class RallyModel():
 
         #Setting the parameters for the event creation
         unique_id = uuid.uuid4().hex
-	LOG.info("History created with id 1111")
+	#LOG.info("History created with id 1111")
 	LOG.info(kw)
         arg = {
             "id": unique_id,
@@ -530,7 +530,7 @@ class RallyModel():
         ins = self.test_history.insert().values(arg)
 	LOG.info(ins)
         result = self.conn.execute(ins)
-        LOG.info("History created with id " + str(unique_id))
+        #LOG.info("History created with id " + str(unique_id))
         return unique_id
     
     def list_test_history(self, args={}):

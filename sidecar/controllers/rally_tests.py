@@ -383,14 +383,22 @@ class RallyTestController(RestController):
         """
 
         # Getting the configuartion file and its details
-        LOG.info("Getting the configuration file(/etc/sidecar/sidecar.conf")
+        LOG.info("Getting the configuration file(/etc/sidecar/sidecar.conf inside RallyTestControler class")
         config_file = cfg.CONF.config_file[0]
         config = ConfigParser.ConfigParser()
         config.read(config_file)
+	LOG.info('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%')
+
+	#Fetch the config entries related to Rally Tests
+	LOG.info('Fetching the benchmark test config details from config file')
+	self.benchmark_test_file_loc = config.get('rally_details', 'benchmark_test_files', '')
+	self.task_file = config.get('rally_details', 'task_file', '')
         
         #Making the database connection
         LOG.info("Making the database connection.")
         self.rally_tests = rally_sql.RallyModel()
+	LOG.info(self.benchmark_test_file_loc)
+	LOG.info('benchmark location printed above')
 
     @expose(generic=True, template='json', content_type="application/json")
     def post(self, **kw):
@@ -479,7 +487,7 @@ class RallyTestController(RestController):
             LOG.info('Entering the loop for All Tests section')
 
             #Making the command for the test execution
-            cmd = 'rally verify start --load-list ' + file_path
+            cmd = 'rally verify start --load-list ' + file_path + ' 2> /dev/null &'
             LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()
@@ -559,8 +567,8 @@ class RallyTestController(RestController):
         LOG.info('Entering the config data check')
 
         #Fetching the config values from DB
-        image_value   = self.rally_tests.get_test_config_value('image_name')
-        flavor_value  = self.rally_tests.get_test_config_value('flavor_name')
+        image_value   = self.rally_tests.get_test_config_value('image_name', project_id)
+        flavor_value  = self.rally_tests.get_test_config_value('flavor_name', project_id)
 
         #config_data = self.rally_tests.get_all_test_configs()
         LOG.info('################################################')
@@ -573,8 +581,9 @@ class RallyTestController(RestController):
         LOG.info('service list printed above+++++++++++++++++++++++++')
         LOG.info(project_id)
         LOG.info('=========================================')
-        yaml_path       = '/home/benchmarkTests/'
-        task_file       = 'task.yaml'
+	LOG.info('Passing the benchmark test values from conf for testing')
+        yaml_path       = self.benchmark_test_file_loc
+        task_file       = self.task_file
         scenario        = yaml_path + task_file
         LOG.info(scenario)
         
@@ -664,7 +673,7 @@ class RallyTestController(RestController):
         # |
         """
         LOG.info('Going to generate the test report')
-        report_cmd = 'rally verify report --uuid '+ test_uuid +' --html'
+        report_cmd = 'rally verify report --uuid '+ test_uuid +' --type html 2> /dev/null &'
         LOG.info('Report command is '+ report_cmd)
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
@@ -685,7 +694,8 @@ class RallyTestController(RestController):
  	LOG.info('Task UUID is ')
  	LOG.info(test_uuid)
  	LOG.info('@@@@@@@@@@@@@@@@@@@@@@')
-        report_cmd = 'rally task report '+ test_uuid +' --html'
+        #report_cmd = 'rally task report '+ test_uuid +' --type html'
+	report_cmd = 'rally task report '+ test_uuid + ' 2> /dev/null &'
         LOG.info('Report command is '+ report_cmd)
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
@@ -722,7 +732,7 @@ class RallyTestController(RestController):
             LOG.info('Entering the loop for QA Tests section')
 
             #Making the command for the test execution
-            cmd = 'rally verify start  --load-list ' + file_path
+            cmd = 'rally verify start  --load-list ' + file_path  + ' 2> /dev/null &'
             LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()
