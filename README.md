@@ -166,6 +166,20 @@ openstack user create --project rallyTestProject --password rallyTest rallyUser1
 git clone https://github.com/openstack/rally.git
 </pre>
 
+2) Replace some templates inside Rally with our files
+  (Ref: https://github.com/binoymvas/rallyboard/tree/master/rally-ui-files/ui)
+  
+  <pre>
+  cd rally
+  cd ui/templates
+  cp -pv  repository/rally-ui-files/ui/templates/base.html
+  cd task
+  cp -pv repository/rally-ui-files/ui/templates/task/report.html ./
+  cd ..
+  cd verification
+  cp -pv repository/rally-ui-files/ui/templates/verification/report.html ./
+  </pre>
+
 2) Execute Rally Installation script by passing the correct db access details
 (We use the sidecar database itself)
 <pre>
