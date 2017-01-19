@@ -317,6 +317,17 @@ CREATE TABLE `tests_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 </pre>
 
+**Table Name - test_history**
+<pre>
+CREATE TABLE `test_history` (
+  `id` varchar(100) NOT NULL,
+  `testlist_id` varchar(100) DEFAULT NULL,
+  `project_id` int(11) NOT NULL,
+  `history_create_time` datetime NOT NULL,
+  `results` longtext NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+</pre>
+
 ### Insert data into these tables
 
 1)  Execute the following queries to store data in these tables.
