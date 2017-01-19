@@ -360,7 +360,14 @@ python qaTest6-insert.py
 
 1) Copy the rally dashboard folder - "rallyboard" into it's corresponding folder (/openstack_dashboard/dashboard/)
 
-2) Check the dashboard settings file and ensure that a section similar to the following is present there:
+2) Copy the jquery file - 'b_jquery.js' to the location '/opt/stack/horizon/static/horizon/lib/jquery/'. The jquery file will be present inside the folder 'horizon_jquery'.
+
+<pre>
+  cd horizon_jquery/
+  cp -pv b_jquery.js   /opt/stack/horizon/static/horizon/lib/jquery/
+</pre>
+
+3) Check the dashboard settings file and ensure that a section similar to the following is present there:
 
 <pre>
 #####Settings Corresponding to Sidecar#####
