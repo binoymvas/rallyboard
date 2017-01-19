@@ -221,6 +221,8 @@ Ref: http://rally.readthedocs.io/en/latest/quick_start/tutorial/step_3_benchmark
 }
 </pre>
 
+**Note: If the username and passwords of the newly created users are different, then the corresponding details are to be used in the above json file.**
+
 A sample json file is included in the repository.
 _Ref: https://github.com/binoymvas/rallyboard/blob/master/existing_users-sample.json_
 
