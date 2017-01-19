@@ -108,9 +108,16 @@ Ref: https://github.com/nephoscale/python-sidecarclient.git
 2) Sidecar api must be already installed.
 Ref: https://github.com/nephoscale/sidecar.git
 
-3) Sidecar service and it's endpoints must be created and configured correctly.
+3) Sidecar database must be present
 
-4) The environment variables must be correctly setup.
+4) Sidecar service and it's endpoints must be created and configured correctly.
+
+<pre>
+ openstack service create  --name sidecar --description "sidecar" sidecar
+ openstack endpoint create  --publicurl http://198.100.181.74:9090/v2  --internalurl http://198.100.181.74:9090/v2  --adminurl http://198.100.181.74:9090/v2  --region RegionOne  sidecar
+</pre>
+
+5) The environment variables must be correctly setup.
 
 _Example_
 
@@ -129,8 +136,11 @@ export OS_AUTH_URL="http://198.100.181.74:35357/v2.0"
 ### Sidecar Related Steps
 
 1) Install the latest version of Sidecar client and sidecar api.
+
 2) Ensure that the sidecar.conf file (/etc/sidecar/sidecar.conf) is updated correctly.
-   (A sample copy is present in this repo. Ref: https://github.com/binoymvas/rallyboard/blob/master/sidecar.conf)
+
+   (A sample copy is present in this repo. 
+   Ref: https://github.com/binoymvas/rallyboard/blob/master/sidecar.conf)
 
 ### Tenant and User Creation
 
