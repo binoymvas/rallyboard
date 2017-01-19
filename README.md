@@ -269,7 +269,7 @@ CREATE TABLE `project_tests_list` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 </pre>
 
 **Table Name - test_config**
@@ -283,7 +283,7 @@ CREATE TABLE `test_config` (
   `project_id` int(11) NOT NULL,
   `test_status` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 </pre>
 
 **Table Name - tests_list**
@@ -301,7 +301,7 @@ CREATE TABLE `tests_list` (
   `test_create_time` datetime NOT NULL,
   `test_uuid` varchar(200) DEFAULT NULL,
   `results` longtext
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 </pre>
 
 **Table Name - tests_log**
@@ -314,7 +314,7 @@ CREATE TABLE `tests_log` (
   `test_status` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 </pre>
 
 ### Insert data into these tables
