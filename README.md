@@ -130,6 +130,7 @@ export OS_AUTH_URL="http://198.100.181.74:35357/v2.0"
 
 1) Install the latest version of Sidecar client and sidecar api.
 2) Ensure that the sidecar.conf file (/etc/sidecar/sidecar.conf) is updated correctly.
+   (A sample copy is present in this repo. Ref: https://github.com/binoymvas/rallyboard/blob/master/sidecar.conf)
 
 ### Tenant and User Creation
 
