@@ -340,6 +340,7 @@ INSERT INTO `test_config` VALUES (1,'image_name','cirros',1,1),(2,'flavor_name',
 INSERT INTO `test_config` VALUES (3,'image_name','cirros',2,1),(4,'flavor_name','m1.tiny',2,1);
 INSERT INTO `test_config` VALUES (5,'image_name','cirros',3,1),(6,'flavor_name','m1.tiny',3,1);
 INSERT INTO `tests_log` VALUES (1,'test-log','test-result',1,1),(2,'test-log','test-result',2,1), (3,'test-log','test-result',3,1);
+UPDATE tests_list SET test_added = 0;
 </pre>
 
 ### Script execution to add tests to the DB
