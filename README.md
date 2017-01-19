@@ -196,6 +196,9 @@ Ref: http://rally.readthedocs.io/en/latest/quick_start/tutorial/step_3_benchmark
 }
 </pre>
 
+A sample json file is included in the repository.
+_Ref: https://github.com/binoymvas/rallyboard/blob/master/existing_users-sample.json_
+
 3) Create a new Rally Deployment by passing the above file.
 <pre>
 rally deployment create --filename existing_users.json  --name name of the deployment
