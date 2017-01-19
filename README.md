@@ -108,9 +108,11 @@ Ref: https://github.com/nephoscale/python-sidecarclient.git
 2) Sidecar api must be already installed.
 Ref: https://github.com/nephoscale/sidecar.git
 
-3) Sidecar service and it's endpoints must be created and configured correctly.
+3) Sidecar database must be present
 
-4) The environment variables must be correctly setup.
+4) Sidecar service and it's endpoints must be created and configured correctly.
+
+5) The environment variables must be correctly setup.
 
 _Example_
 
