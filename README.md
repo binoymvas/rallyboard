@@ -112,6 +112,11 @@ Ref: https://github.com/nephoscale/sidecar.git
 
 4) Sidecar service and it's endpoints must be created and configured correctly.
 
+<pre>
+ openstack service create  --name sidecar --description "sidecar" sidecar
+ openstack endpoint create  --publicurl http://198.100.181.74:9090/v2  --internalurl http://198.100.181.74:9090/v2  --adminurl http://198.100.181.74:9090/v2  --region RegionOne  sidecar
+</pre>
+
 5) The environment variables must be correctly setup.
 
 _Example_
