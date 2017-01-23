@@ -200,7 +200,6 @@ Ref: http://rally.readthedocs.io/en/latest/quick_start/tutorial/step_3_benchmark
     "type": "ExistingCloud",
     "auth_url": "http://198.100.181.74:35357/v2.0",
     "region_name": "RegionOne",
-    "endpoint_type": "public",
     "admin": {
         "username": "admin",
         "password": "openstack",
@@ -220,6 +219,8 @@ Ref: http://rally.readthedocs.io/en/latest/quick_start/tutorial/step_3_benchmark
     ]
 }
 </pre>
+
+**Note: The endpoint type variable was also present in the json file. However, this has been removed due to incompatibility issues with the latest version of Keystone**
 
 **Note: If the username and passwords of the newly created users are different, then the corresponding details are to be used in the above json file.**
 
