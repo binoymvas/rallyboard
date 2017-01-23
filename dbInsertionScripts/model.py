@@ -21,7 +21,7 @@ LOG = log.getLogger(__name__)
 
 # READ THE CONNECTION VARIABLE
 try:
-    sql_connection = 'mysql+pymysql://root:openstack@198.100.181.74/sidecar'    
+    sql_connection = 'mysql+pymysql://root:openstack@198.100.181.77/sidecar'    
     LOG.info("Getting the db configuration and ding the connection.)")
 except Exception as e:
     LOG.error(str(e))

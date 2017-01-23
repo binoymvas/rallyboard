@@ -2,7 +2,6 @@
     "type": "ExistingCloud",
     "auth_url": "http://198.100.181.74:35357/v2.0",
     "region_name": "RegionOne",
-    "endpoint_type": "public",
     "admin": {
         "username": "admin",
         "password": "openstack",
