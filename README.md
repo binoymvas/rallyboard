@@ -232,7 +232,7 @@ _Ref: https://github.com/binoymvas/rallyboard/blob/master/existing_users-sample.
 rally deployment create --filename existing_users.json  --name name of the deployment
 </pre>
 
-**Ex- rally deployment create --filename existing_users.json  --name sampleDeployment***
+**Ex- rally deployment create --filename existing_users.json  --name sampleDeployment**
 
 ### Add Tempest as a verifier to Rally
 
