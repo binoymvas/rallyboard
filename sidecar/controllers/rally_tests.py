@@ -25,12 +25,17 @@ import subprocess
 import shlex
 import re
 import os
+from pecan import conf
 
 try:
     import simplejson as json
 except ImportError: 
     import json
 import datetime
+
+#Getting the rally command list
+conf_values = conf.rally_command_list
+
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
@@ -488,6 +493,8 @@ class RallyTestController(RestController):
 
             #Making the command for the test execution
             cmd = 'rally verify start --load-list ' + file_path + ' 2> /dev/null &'
+	    LOG.info(cmd)
+	    cmd = conf_values.all_test_execute % file_path
             LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()
@@ -590,6 +597,10 @@ class RallyTestController(RestController):
 	#cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + '}\''
         cmd = 'rally task start '+ scenario +' --task-args \'{"service_list": ' + str(services) + ', "image_name": ' + image_value + ', "flavor_name": '+ flavor_value + '}\''
 
+        LOG.info(cmd)
+	cmd = conf_values.benchmark_execute %  scenario +' \'{"service_list": ' + str(services) + ', "image_name": ' + image_value + ', "flavor_name": '+ flavor_value + '}\''
+	LOG.info('new cmd is')
+
         LOG.info('Command is ')
         LOG.info(cmd)
         LOG.info("~~~~~~~~~@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@~~~~~~~~~~~~~~~")
@@ -674,6 +685,9 @@ class RallyTestController(RestController):
         """
         LOG.info('Going to generate the test report')
         report_cmd = 'rally verify report --uuid '+ test_uuid +' --type html 2> /dev/null &'
+	LOG.info(report_cmd)
+	LOG.info('new reporttt')
+        report_cmd = conf_values.generate_all_test_report %  test_uuid
         LOG.info('Report command is '+ report_cmd)
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
@@ -696,7 +710,9 @@ class RallyTestController(RestController):
  	LOG.info('@@@@@@@@@@@@@@@@@@@@@@')
         #report_cmd = 'rally task report '+ test_uuid +' --type html'
 	report_cmd = 'rally task report '+ test_uuid + ' 2> /dev/null &'
-        LOG.info('Report command is '+ report_cmd)
+	LOG.info(report_cmd)
+	report_cmd = conf_values.generate_benchmarktest_report % test_uuid
+        LOG.info('New report command is '+ report_cmd)
         p = subprocess.Popen(report_cmd, stderr=subprocess.STDOUT, shell=True, stdout=subprocess.PIPE)
         output, err = p.communicate()
  	LOG.info('Benchmarking test Report Has been Generated successfully')
@@ -733,6 +749,8 @@ class RallyTestController(RestController):
 
             #Making the command for the test execution
             cmd = 'rally verify start  --load-list ' + file_path  + ' 2> /dev/null &'
+	    LOG.info(cmd)
+	    cmd = conf_values.all_test_execute % file_path
             LOG.info(cmd)
             res = subprocess.Popen(cmd, stderr=subprocess.STDOUT, shell = True, stdout=subprocess.PIPE)
             output, err = res.communicate()

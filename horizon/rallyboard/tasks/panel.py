@@ -16,7 +16,7 @@ from openstack_dashboard.dashboards.rallyboard import dashboard
 import horizon
 
 class Tasks(horizon.Panel):
-    name = _("Tasks")
+    name = _("Test Suites")
     slug = "tasks"
     
 #Registering the class

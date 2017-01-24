@@ -514,6 +514,8 @@ class RallyModel():
         Return : Json data
         """
 
+	LOG.info('-----------------------------------------------')
+	LOG.info('create history function')
         #Setting the parameters for the event creation
         unique_id = uuid.uuid4().hex
 	#LOG.info("History created with id 1111")
@@ -563,7 +565,8 @@ class RallyModel():
                 valid_args[arg] = args[arg]
 
         # Okay Bow lets start our query builder
-	get_history_list = select([self.test_history, self.tests_list.c.test_regex, self.tests_list.c.test_service], self.tests_list.c.id == self.test_history.c.testlist_id)
+	#get_history_list = select([self.test_history, self.tests_list.c.test_regex, self.tests_list.c.test_service], self.tests_list.c.id == self.test_history.c.testlist_id)
+	get_history_list = select([self.test_history, self.tests_list.c.test_regex, self.tests_list.c.test_service])
            
 	#Iterating through each key
         for key in valid_args:
@@ -590,6 +593,7 @@ class RallyModel():
                 get_history_list = get_history_list.where(self.test_history.c.history_create_time <= val)
         
         LOG.info("Created the query with filter options.")
+        get_history_list = get_history_list.group_by(self.test_history.c.id)
         get_history_list = get_history_list.order_by(desc(self.test_history.c.history_create_time))
         # As per the documentaion in
         # https://specs.openstack.org/openstack/api-wg/guidelines/pagination_filter_sort.html

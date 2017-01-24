@@ -16,7 +16,7 @@ from openstack_dashboard.dashboards.rallyboard import dashboard
 import horizon
 
 class TestReports(horizon.Panel):
-    name = _("Tests History")
+    name = _("History")
     slug = "test_reports"
     
 #Registering the class
