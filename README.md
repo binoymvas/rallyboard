@@ -65,7 +65,7 @@ All the available Testing options will be listed in this panel. Following action
                 - Users can select the tests which they want to execute from this section.
                  http://i.imgur.com/CO9wG6A.png
 
-  - **View Report - Displays the latest test report**]
+  - **View Report - Displays the latest test report**
   
     ![Actions](http://i.imgur.com/zQ3UtZx.png "Actions")
         
